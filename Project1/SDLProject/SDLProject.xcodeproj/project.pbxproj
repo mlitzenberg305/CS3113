@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		28011A69265CB33F00BA3FF9 /* xoco-body.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A68265CB33900BA3FF9 /* xoco-body.png */; };
+		28011A6B265D5CED00BA3FF9 /* kibble.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A6A265D5CE500BA3FF9 /* kibble.png */; };
+		28011A6D265D8B8800BA3FF9 /* ground.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A6C265D8B8000BA3FF9 /* ground.png */; };
+		28011A6F265D8FE400BA3FF9 /* deep-ground.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A6E265D8FDF00BA3FF9 /* deep-ground.png */; };
+		28011A71265D953900BA3FF9 /* cloud.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A70265D953500BA3FF9 /* cloud.png */; };
 		DBDF1B532323DE3F007CECB1 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DBDF1B522323DE3F007CECB1 /* main.cpp */; };
 		DBDF1B5E2323DE8D007CECB1 /* ShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DBDF1B5D2323DE8D007CECB1 /* ShaderProgram.cpp */; };
 		DBDF1B612323DE9E007CECB1 /* shaders in CopyFiles */ = {isa = PBXBuildFile; fileRef = DBDF1B5C2323DE8D007CECB1 /* shaders */; };
@@ -25,12 +30,22 @@
 			dstSubfolderSpec = 6;
 			files = (
 				DBDF1B612323DE9E007CECB1 /* shaders in CopyFiles */,
+				28011A69265CB33F00BA3FF9 /* xoco-body.png in CopyFiles */,
+				28011A6B265D5CED00BA3FF9 /* kibble.png in CopyFiles */,
+				28011A6D265D8B8800BA3FF9 /* ground.png in CopyFiles */,
+				28011A6F265D8FE400BA3FF9 /* deep-ground.png in CopyFiles */,
+				28011A71265D953900BA3FF9 /* cloud.png in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		28011A68265CB33900BA3FF9 /* xoco-body.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "xoco-body.png"; path = "../../Assets/xoco-body.png"; sourceTree = "<group>"; };
+		28011A6A265D5CE500BA3FF9 /* kibble.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = kibble.png; path = ../../Assets/kibble.png; sourceTree = "<group>"; };
+		28011A6C265D8B8000BA3FF9 /* ground.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ground.png; path = ../../Assets/ground.png; sourceTree = "<group>"; };
+		28011A6E265D8FDF00BA3FF9 /* deep-ground.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "deep-ground.png"; path = "../../Assets/deep-ground.png"; sourceTree = "<group>"; };
+		28011A70265D953500BA3FF9 /* cloud.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = cloud.png; path = ../../Assets/cloud.png; sourceTree = "<group>"; };
 		DBDF1B4F2323DE3F007CECB1 /* SDLProject */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SDLProject; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBDF1B522323DE3F007CECB1 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		DBDF1B592323DE8D007CECB1 /* ShaderProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderProgram.h; sourceTree = "<group>"; };
@@ -81,6 +96,11 @@
 		DBDF1B512323DE3F007CECB1 /* SDLProject */ = {
 			isa = PBXGroup;
 			children = (
+				28011A70265D953500BA3FF9 /* cloud.png */,
+				28011A6E265D8FDF00BA3FF9 /* deep-ground.png */,
+				28011A6C265D8B8000BA3FF9 /* ground.png */,
+				28011A6A265D5CE500BA3FF9 /* kibble.png */,
+				28011A68265CB33900BA3FF9 /* xoco-body.png */,
 				DBDF1B5B2323DE8D007CECB1 /* glm */,
 				DBDF1B5D2323DE8D007CECB1 /* ShaderProgram.cpp */,
 				DBDF1B592323DE8D007CECB1 /* ShaderProgram.h */,
