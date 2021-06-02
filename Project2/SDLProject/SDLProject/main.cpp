@@ -291,7 +291,7 @@ void Update() {
     
     // ball speed
     if (numOfHits == 5) {
-        ball.speed += 0.2f;
+        ball.speed += 0.25f;
         numOfHits = 0;
     }
     
@@ -432,8 +432,6 @@ int main(int argc, char* argv[]) {
         Render();
     }
     
-    std::cout << ball.speed;
-    std::cout << "\n";
     Shutdown();
     return 0;
 }
