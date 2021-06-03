@@ -20,6 +20,7 @@
 
 SDL_Window* displayWindow;
 bool gameIsRunning = true;
+bool gameOver = false;
 
 ShaderProgram program;
 glm::mat4 viewMatrix, projectionMatrix;
@@ -177,26 +178,27 @@ void ProcessInput() {
         
         paddleOne.movement = glm::vec3(0, 0, 0);
         paddleTwo.movement = glm::vec3(0, 0, 0);
-        
-        const Uint8 *keys = SDL_GetKeyboardState(NULL);
-        
-        if (keys[SDL_SCANCODE_UP]) {
-            paddleOne.movement.y = 1.0f;
-        }
-        else if (keys[SDL_SCANCODE_DOWN]) {
-            paddleOne.movement.y = -1.0f;
-        }
-        if (keys[SDL_SCANCODE_W]) {
-            paddleTwo.movement.y = 1.0f;
-        }
-        else if (keys[SDL_SCANCODE_S]) {
-            paddleTwo.movement.y = -1.0f;
-        }
-        if (glm::length(paddleOne.movement) > 1.0f) {
-            paddleOne.movement = glm::normalize(paddleOne.movement);
-        }
-        if (glm::length(paddleTwo.movement) > 1.0f) {
-            paddleTwo.movement = glm::normalize(paddleTwo.movement);
+        if (!gameOver) {
+            const Uint8 *keys = SDL_GetKeyboardState(NULL);
+            
+            if (keys[SDL_SCANCODE_UP]) {
+                paddleOne.movement.y = 1.0f;
+            }
+            else if (keys[SDL_SCANCODE_DOWN]) {
+                paddleOne.movement.y = -1.0f;
+            }
+            if (keys[SDL_SCANCODE_W]) {
+                paddleTwo.movement.y = 1.0f;
+            }
+            else if (keys[SDL_SCANCODE_S]) {
+                paddleTwo.movement.y = -1.0f;
+            }
+            if (glm::length(paddleOne.movement) > 1.0f) {
+                paddleOne.movement = glm::normalize(paddleOne.movement);
+            }
+            if (glm::length(paddleTwo.movement) > 1.0f) {
+                paddleTwo.movement = glm::normalize(paddleTwo.movement);
+            }
         }
     }
 }
@@ -236,8 +238,10 @@ void Update() {
     // ball collision side walls
     if (ball.position.x + ball.box.size.x / 2 > 5.1) {
         ball.movement = glm::vec3(0.0f, 0.0f, 0.0f);
+        gameOver = true;
     } else if (ball.position.x - ball.box.size.x / 2 < -5.1) {
         ball.movement = glm::vec3(0.0f, 0.0f, 0.0f);
+        gameOver = true;
     }
     // paddle one collision top & bottom wall
     if (paddleOne.box.position.y + paddleOne.box.size.y / 2 > 2.75f) {
@@ -296,79 +300,83 @@ void Update() {
     }
     
      //XOCO THINGS
-         // movement
-    int xocoMove = rand() % 100;
-    if (xocoMove == 5) {
-        int xDir = rand() % 2;
-        int yDir = rand() % 2;
-        int xPos = rand() % 2;
-        int yPos = rand() % 2;
+    if (!gameOver) {
+        // movement
+        int xocoMove = rand() % 100;
+        if (xocoMove == 5) {
+            int xDir = rand() % 2;
+            int yDir = rand() % 2;
+            int xPos = rand() % 2;
+            int yPos = rand() % 2;
 
-        xoco.movement.x = xDir;
-        xoco.movement.y = yDir;
-        if (xPos == 0) {
-            xoco.movement.x = xoco.movement.x * -1;
+            xoco.movement.x = xDir;
+            xoco.movement.y = yDir;
+            if (xPos == 0) {
+                xoco.movement.x = xoco.movement.x * -1;
+            }
+            if (yPos == 0) {
+                xoco.movement.y = xoco.movement.y * -1;
+            }
         }
-        if (yPos == 0) {
+        // collision top & bottom
+        if (xoco.box.position.y + xoco.box.size.y / 2 > 3.0f) {
+            xoco.movement.y = xoco.movement.y * -1;
+        } else if (xoco.box.position.y - xoco.box.size.y / 2 < -3.0f) {
             xoco.movement.y = xoco.movement.y * -1;
         }
-    }
-         // collision top & bottom
-    if (xoco.box.position.y + xoco.box.size.y / 2 > 3.0f) {
-        xoco.movement.y = xoco.movement.y * -1;
-    } else if (xoco.box.position.y - xoco.box.size.y / 2 < -3.0f) {
-        xoco.movement.y = xoco.movement.y * -1;
-    }
         // collision sides
-    if (xoco.box.position.x + xoco.box.size.x / 2 > 5.0f) {
-        xoco.movement.x = xoco.movement.x * -1;
-    } else if (xoco.box.position.x - xoco.box.size.x / 2 < -5.0f) {
-        xoco.movement.x = xoco.movement.x * -1;
-    }
+        if (xoco.box.position.x + xoco.box.size.x / 2 > 5.0f) {
+            xoco.movement.x = xoco.movement.x * -1;
+        } else if (xoco.box.position.x - xoco.box.size.x / 2 < -5.0f) {
+            xoco.movement.x = xoco.movement.x * -1;
+        }
         // collision with kibble
-    float xdistX = fabs(xoco.box.position.x - ball.box.position.x) - ((xoco.box.size.x + ball.box.size.x) / 2.0f);
-    float ydistX = fabs(xoco.box.position.y - ball.box.position.y) - ((xoco.box.size.y + ball.box.size.y) / 2.0f);
-    if (xdistX < 0 && ydistX < 0) {
-        ball.movement.x = ball.movement.x * -1;
-        ball.movement.y = ball.movement.y * -1;      // reverses direction of ball
-        xoco.movement.x = xoco.movement.x * -1;
-        xoco.movement.y = xoco.movement.y * -1;      // reverses direction of xoco
-    }
+        float xdistX = fabs(xoco.box.position.x - ball.box.position.x) - ((xoco.box.size.x + ball.box.size.x) / 2.0f);
+        float ydistX = fabs(xoco.box.position.y - ball.box.position.y) - ((xoco.box.size.y + ball.box.size.y) / 2.0f);
+        if (xdistX < 0 && ydistX < 0) {
+            ball.movement.x = ball.movement.x * -1;
+            ball.movement.y = ball.movement.y * -1;      // reverses direction of ball
+            xoco.movement.x = xoco.movement.x * -1;
+            xoco.movement.y = xoco.movement.y * -1;      // reverses direction of xoco
+        }
         // position
-    xoco.position += xoco.movement * xoco.speed * deltaTime;
-    xoco.box.position = xoco.position;
-    xoco.matrix = glm::mat4(1.0f);
-    xoco.matrix = glm::translate(xoco.matrix, xoco.position);
+        xoco.position += xoco.movement * xoco.speed * deltaTime;
+        xoco.box.position = xoco.position;
+        xoco.matrix = glm::mat4(1.0f);
+        xoco.matrix = glm::translate(xoco.matrix, xoco.position);
         // rotation
-    if (xoco.movement.y == -1 && xoco.movement.x == 0) {
-        xoco.rotation = 180.0f;
-        xoco.box.size = glm::vec3(0.5f, 1.0f, 0.0f);
-    } else if (xoco.movement.y == 1 && xoco.movement.x == 0) {
-        xoco.rotation = 0.0f;
-        xoco.box.size = glm::vec3(0.5f, 1.0f, 0.0f);
-    } else if (xoco.movement.y == 1 && xoco.movement.x == 1) {
-        xoco.rotation = 315.0f;
-        xoco.box.size = glm::vec3(0.5f, 0.5f, 0.0f);
-    } else if (xoco.movement.y == -1 && xoco.movement.x == 1) {
-        xoco.rotation = 225.0f;
-        xoco.box.size = glm::vec3(0.5f, 0.5f, 0.0f);
-    }
-    if (xoco.movement.x == -1 && xoco.movement.y == 0) {
-        xoco.rotation = 90.0f;
-        xoco.box.size = glm::vec3(1.0f, 0.5f, 0.0f);
-    } else if (xoco.movement.x == 1 && xoco.movement.y == 0) {
-        xoco.rotation = 270.0f;
-        xoco.box.size = glm::vec3(1.0f, 0.5f, 0.0f);
-    } else if (xoco.movement.x == -1 && xoco.movement.y == 1) {
-        xoco.rotation = 45.0f;
-        xoco.box.size = glm::vec3(0.5f, 0.5f, 0.0f);
-    } else if (xoco.movement.x == -1 && xoco.movement.y == -1) {
-        xoco.rotation = 135.0f;
-        xoco.box.size = glm::vec3(0.5f, 0.5f, 0.0f);
-    }
-    xoco.matrix = glm::rotate(xoco.matrix, glm::radians(xoco.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+        if (xoco.movement.y == -1 && xoco.movement.x == 0) {
+            xoco.rotation = 180.0f;
+            xoco.box.size = glm::vec3(0.5f, 1.0f, 0.0f);
+        } else if (xoco.movement.y == 1 && xoco.movement.x == 0) {
+            xoco.rotation = 0.0f;
+            xoco.box.size = glm::vec3(0.5f, 1.0f, 0.0f);
+        } else if (xoco.movement.y == 1 && xoco.movement.x == 1) {
+            xoco.rotation = 315.0f;
+            xoco.box.size = glm::vec3(0.5f, 0.5f, 0.0f);
+        } else if (xoco.movement.y == -1 && xoco.movement.x == 1) {
+            xoco.rotation = 225.0f;
+            xoco.box.size = glm::vec3(0.5f, 0.5f, 0.0f);
+        }
+        if (xoco.movement.x == -1 && xoco.movement.y == 0) {
+            xoco.rotation = 90.0f;
+            xoco.box.size = glm::vec3(1.0f, 0.5f, 0.0f);
+        } else if (xoco.movement.x == 1 && xoco.movement.y == 0) {
+            xoco.rotation = 270.0f;
+            xoco.box.size = glm::vec3(1.0f, 0.5f, 0.0f);
+        } else if (xoco.movement.x == -1 && xoco.movement.y == 1) {
+            xoco.rotation = 45.0f;
+            xoco.box.size = glm::vec3(0.5f, 0.5f, 0.0f);
+        } else if (xoco.movement.x == -1 && xoco.movement.y == -1) {
+            xoco.rotation = 135.0f;
+            xoco.box.size = glm::vec3(0.5f, 0.5f, 0.0f);
+        }
+        xoco.matrix = glm::rotate(xoco.matrix, glm::radians(xoco.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
         // scale
-    xoco.matrix = glm::scale(xoco.matrix, glm::vec3(1.5f, 1.5f, 1.0f));
+        xoco.matrix = glm::scale(xoco.matrix, glm::vec3(1.5f, 1.5f, 1.0f));
+    } else {
+        xoco.movement = glm::vec3(0.0f, 0.0f, 0.0f);
+    }
 }
 
 void drawPaddle(struct Paddle paddle) {
