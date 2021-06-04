@@ -12,6 +12,13 @@
 		28011A842666E4DC00BA3FF9 /* dog-bowlR.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A832666E4D800BA3FF9 /* dog-bowlR.png */; };
 		28011A86266814F200BA3FF9 /* ground.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A85266814DA00BA3FF9 /* ground.png */; };
 		28011A882668273300BA3FF9 /* xoco.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A872668272A00BA3FF9 /* xoco.png */; };
+		28011A8A266993E000BA3FF9 /* gameover.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A89266993D900BA3FF9 /* gameover.png */; };
+		28011A8C266995B000BA3FF9 /* player-wins.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A8B266995A700BA3FF9 /* player-wins.png */; };
+		28011A8F2669983B00BA3FF9 /* one.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A8D2669976B00BA3FF9 /* one.png */; };
+		28011A902669984100BA3FF9 /* two.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A8E2669977300BA3FF9 /* two.png */; };
+		28011A922669A52500BA3FF9 /* start.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A912669A3AB00BA3FF9 /* start.png */; };
+		28011A952669E19000BA3FF9 /* numbers in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A942669E18500BA3FF9 /* numbers */; };
+		28011A962669E19600BA3FF9 /* level.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 28011A932669E17C00BA3FF9 /* level.png */; };
 		DBDF1B532323DE3F007CECB1 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DBDF1B522323DE3F007CECB1 /* main.cpp */; };
 		DBDF1B5E2323DE8D007CECB1 /* ShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DBDF1B5D2323DE8D007CECB1 /* ShaderProgram.cpp */; };
 		DBDF1B612323DE9E007CECB1 /* shaders in CopyFiles */ = {isa = PBXBuildFile; fileRef = DBDF1B5C2323DE8D007CECB1 /* shaders */; };
@@ -30,11 +37,18 @@
 			dstSubfolderSpec = 6;
 			files = (
 				DBDF1B612323DE9E007CECB1 /* shaders in CopyFiles */,
+				28011A952669E19000BA3FF9 /* numbers in CopyFiles */,
+				28011A962669E19600BA3FF9 /* level.png in CopyFiles */,
+				28011A922669A52500BA3FF9 /* start.png in CopyFiles */,
 				28011A7F2660A12700BA3FF9 /* kibble.png in CopyFiles */,
 				28011A822666D99D00BA3FF9 /* dog-bowlL.png in CopyFiles */,
 				28011A842666E4DC00BA3FF9 /* dog-bowlR.png in CopyFiles */,
 				28011A86266814F200BA3FF9 /* ground.png in CopyFiles */,
 				28011A882668273300BA3FF9 /* xoco.png in CopyFiles */,
+				28011A8A266993E000BA3FF9 /* gameover.png in CopyFiles */,
+				28011A8C266995B000BA3FF9 /* player-wins.png in CopyFiles */,
+				28011A8F2669983B00BA3FF9 /* one.png in CopyFiles */,
+				28011A902669984100BA3FF9 /* two.png in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,6 +60,13 @@
 		28011A832666E4D800BA3FF9 /* dog-bowlR.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "dog-bowlR.png"; path = "../../Assets/dog-bowlR.png"; sourceTree = "<group>"; };
 		28011A85266814DA00BA3FF9 /* ground.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ground.png; path = ../../Assets/ground.png; sourceTree = "<group>"; };
 		28011A872668272A00BA3FF9 /* xoco.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = xoco.png; path = ../../Assets/xoco.png; sourceTree = "<group>"; };
+		28011A89266993D900BA3FF9 /* gameover.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = gameover.png; path = ../../Assets/gameover.png; sourceTree = "<group>"; };
+		28011A8B266995A700BA3FF9 /* player-wins.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "player-wins.png"; path = "../../Assets/player-wins.png"; sourceTree = "<group>"; };
+		28011A8D2669976B00BA3FF9 /* one.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = one.png; path = ../../Assets/one.png; sourceTree = "<group>"; };
+		28011A8E2669977300BA3FF9 /* two.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = two.png; path = ../../Assets/two.png; sourceTree = "<group>"; };
+		28011A912669A3AB00BA3FF9 /* start.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = start.png; path = ../../Assets/start.png; sourceTree = "<group>"; };
+		28011A932669E17C00BA3FF9 /* level.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = level.png; path = ../../Assets/level.png; sourceTree = "<group>"; };
+		28011A942669E18500BA3FF9 /* numbers */ = {isa = PBXFileReference; lastKnownFileType = folder; name = numbers; path = ../../Assets/numbers; sourceTree = "<group>"; };
 		DBDF1B4F2323DE3F007CECB1 /* SDLProject */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SDLProject; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBDF1B522323DE3F007CECB1 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		DBDF1B592323DE8D007CECB1 /* ShaderProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderProgram.h; sourceTree = "<group>"; };
@@ -96,6 +117,13 @@
 		DBDF1B512323DE3F007CECB1 /* SDLProject */ = {
 			isa = PBXGroup;
 			children = (
+				28011A942669E18500BA3FF9 /* numbers */,
+				28011A932669E17C00BA3FF9 /* level.png */,
+				28011A912669A3AB00BA3FF9 /* start.png */,
+				28011A8D2669976B00BA3FF9 /* one.png */,
+				28011A8E2669977300BA3FF9 /* two.png */,
+				28011A8B266995A700BA3FF9 /* player-wins.png */,
+				28011A89266993D900BA3FF9 /* gameover.png */,
 				28011A872668272A00BA3FF9 /* xoco.png */,
 				28011A812666D99900BA3FF9 /* dog-bowlL.png */,
 				28011A832666E4D800BA3FF9 /* dog-bowlR.png */,

@@ -21,11 +21,18 @@
 SDL_Window* displayWindow;
 bool gameIsRunning = true;
 bool gameOver = false;
+bool gameStart = false;
+int level = 1;
 
 ShaderProgram program;
 glm::mat4 viewMatrix, projectionMatrix;
 int numOfHits = 0;
 
+struct Level {
+    glm::mat4 matrix;
+    glm::vec3 position;
+    GLuint textureID;
+};
 struct CollisionBox {
     glm::vec3 position;
     glm::vec3 size;
@@ -68,6 +75,20 @@ struct Ball ball;
 struct Xoco xoco;
 struct Tile tileTop[NUM_OF_TILES];
 struct Tile tileBottom[NUM_OF_TILES];
+
+struct Level levelNums[10];
+glm::mat4 startMatrix;
+GLuint startTextureID;
+glm::mat4 gameOverMatrix;
+GLuint gameOverTextureID;
+glm::mat4 playerWinsMatrix;
+GLuint playerWinsTextureID;
+glm::mat4 oneMatrix;
+GLuint oneTextureID;
+glm::mat4 twoMatrix;
+GLuint twoTextureID;
+glm::mat4 levelMatrix;
+GLuint levelTextureID;
 
 GLuint LoadTexture(const char* filePath) {
     int w, h, n;
@@ -120,24 +141,62 @@ void Initialize() {
         
         tileBottom[i].textureID = LoadTexture("ground.png");
     }
+    
+    // initializing text
+    startMatrix = glm::mat4(1.0f);
+    startTextureID = LoadTexture("start.png");
+    startMatrix = glm::translate(startMatrix, glm::vec3(0.0f, 1.5f, 0.0f));
+    startMatrix = glm::scale(startMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+    gameOverMatrix = glm::mat4(1.0f);
+    gameOverTextureID = LoadTexture("gameover.png");
+    gameOverMatrix = glm::scale(gameOverMatrix, glm::vec3(5.0f, 5.0f, 1.0f));
+    playerWinsMatrix = glm::mat4(1.0f);
+    playerWinsTextureID = LoadTexture("player-wins.png");
+    playerWinsMatrix = glm::translate(playerWinsMatrix, glm::vec3(0.0f, -2.0f, 0.0f));
+    playerWinsMatrix = glm::scale(playerWinsMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+    oneMatrix = glm::mat4(1.0f);
+    oneTextureID = LoadTexture("one.png");
+    oneMatrix = glm::translate(oneMatrix, glm::vec3(0.0f, -2.0f, 0.0f));
+    oneMatrix = glm::scale(oneMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+    twoMatrix = glm::mat4(1.0f);
+    twoTextureID = LoadTexture("two.png");
+    twoMatrix = glm::translate(twoMatrix, glm::vec3(0.0f, -2.0f, 0.0f));
+    twoMatrix = glm::scale(twoMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+    levelMatrix = glm::mat4(1.0f);
+    levelTextureID = LoadTexture("level.png");
+    levelMatrix = glm::translate(levelMatrix, glm::vec3(0.0f, 3.0f, 0.0f));
+    levelMatrix = glm::scale(levelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+    for( int i = 0; i < 10; i++) {
+        std::string temp1 = "numbers/";
+        std::string temp2 = std::to_string(i);
+        std::string temp3 = ".png";
+        std::string filename = temp1 + temp2 + temp3;
+        const char *cstr = filename.c_str();
+        levelNums[i].matrix = glm::mat4(1.0f);
+        levelNums[i].textureID = LoadTexture(cstr);
+        levelNums[i].matrix = glm::translate(levelNums[i].matrix, glm::vec3(0.0f, 3.0f, 0.0f));
+        levelNums[i].matrix = glm::scale(levelNums[i].matrix, glm::vec3(2.0f, 2.0f, 1.0f));
+    }
+    
     // initializing Xoco
     xoco.matrix = glm::mat4(1.0f);
-    xoco.position = glm::vec3(-4.0f, 0.0f, 0.0f);
+    xoco.position = glm::vec3(0.0f, 0.0f, 0.0f);
     xoco.box.position = xoco.position;
     xoco.box.size = glm::vec3(0.5f, 1.0f, 0.0f);
     xoco.speed = 1;
     xoco.rotation = 0;
-    xoco.movement = glm::vec3(1.0f, 1.0f, 0.0f);
+    xoco.movement = glm::vec3(0.0f, 0.0f, 0.0f);
     xoco.textureID = LoadTexture("xoco.png");
+    xoco.matrix = glm::scale(xoco.matrix, glm::vec3(1.5f, 1.5f, 1.0f));
     
     // initializing ball
     ball.matrix = glm::mat4(1.0f);
-    ball.position = glm::vec3(-4.0f, 0.0f, 0.0f);
+    ball.position = glm::vec3(0.0f, 1.5f, 0.0f);
     ball.box.position = ball.position;
     ball.box.size = glm::vec3(0.75f, 0.75f, 0.0f);
-    ball.speed = 3;
+    ball.speed = 3.5;
     ball.rotation = 0.0f;
-    ball.movement = glm::vec3(1.0f, -0.25f, 0.0f);
+    ball.movement = glm::vec3(0.0f, 0.0f, 0.0f);
     ball.textureID = LoadTexture("kibble.png");
     
     // initializing paddle one
@@ -175,12 +234,37 @@ void ProcessInput() {
         if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
             gameIsRunning = false;
         }
-        
+        // key inputs
+        const Uint8 *keys = SDL_GetKeyboardState(NULL);
+        if (keys[SDL_SCANCODE_SPACE] && !gameStart) {
+            gameStart = true;
+            gameOver = false;
+            
+            ball.position = glm::vec3(0.0f, 1.5f, 0.0f);
+            ball.box.position = ball.position;
+            ball.speed = 3.5;
+            ball.rotation = 0.0f;
+            ball.matrix = glm::rotate(ball.matrix, glm::radians(ball.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+            
+            xoco.position = glm::vec3(0.0f, 0.0f, 0.0f);
+            xoco.box.position = xoco.position;
+            xoco.rotation = 0.0f;
+            xoco.matrix = glm::rotate(xoco.matrix, glm::radians(xoco.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+            
+            int xPosBall = rand() % 2;
+            int yPosBall = rand() % 2;
+            
+            ball.movement = glm::vec3(1.0f, 0.5f, 0.0f);
+            if (xPosBall == 0) {
+                ball.movement.x = ball.movement.x * -1;
+            }
+            if (yPosBall == 0) {
+                ball.movement.y = ball.movement.y * -1;
+            }
+        }
         paddleOne.movement = glm::vec3(0, 0, 0);
         paddleTwo.movement = glm::vec3(0, 0, 0);
-        if (!gameOver) {
-            const Uint8 *keys = SDL_GetKeyboardState(NULL);
-            
+        if (!gameOver && gameStart) {
             if (keys[SDL_SCANCODE_UP]) {
                 paddleOne.movement.y = 1.0f;
             }
@@ -239,9 +323,13 @@ void Update() {
     if (ball.position.x + ball.box.size.x / 2 > 5.1) {
         ball.movement = glm::vec3(0.0f, 0.0f, 0.0f);
         gameOver = true;
+        gameStart = false;
+        level = 1;
     } else if (ball.position.x - ball.box.size.x / 2 < -5.1) {
         ball.movement = glm::vec3(0.0f, 0.0f, 0.0f);
         gameOver = true;
+        gameStart = false;
+        level = 1;
     }
     // paddle one collision top & bottom wall
     if (paddleOne.box.position.y + paddleOne.box.size.y / 2 > 2.75f) {
@@ -295,12 +383,13 @@ void Update() {
     
     // ball speed
     if (numOfHits == 5) {
-        ball.speed += 0.25f;
+        ball.speed += 0.5f;
         numOfHits = 0;
+        level += 1;
     }
     
      //XOCO THINGS
-    if (!gameOver) {
+    if (!gameOver && gameStart) {
         // movement
         int xocoMove = rand() % 100;
         if (xocoMove == 5) {
@@ -335,9 +424,8 @@ void Update() {
         float ydistX = fabs(xoco.box.position.y - ball.box.position.y) - ((xoco.box.size.y + ball.box.size.y) / 2.0f);
         if (xdistX < 0 && ydistX < 0) {
             ball.movement.x = ball.movement.x * -1;
-            ball.movement.y = ball.movement.y * -1;      // reverses direction of ball
-            xoco.movement.x = xoco.movement.x * -1;
-            xoco.movement.y = xoco.movement.y * -1;      // reverses direction of xoco
+            ball.movement.y = ball.movement.y * -1;         // reverses direction of ball
+            xoco.movement.y = xoco.movement.y * -1;         // reverses direction of xoco
         }
         // position
         xoco.position += xoco.movement * xoco.speed * deltaTime;
@@ -399,6 +487,41 @@ void drawGround(struct Tile tile) {
     glBindTexture(GL_TEXTURE_2D, tile.textureID);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
+void drawGameOver(){
+    program.SetModelMatrix(gameOverMatrix);
+    glBindTexture(GL_TEXTURE_2D, gameOverTextureID);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+void drawPlayerWins(){
+    program.SetModelMatrix(playerWinsMatrix);
+    glBindTexture(GL_TEXTURE_2D, playerWinsTextureID);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    if (ball.position.x < 0) {
+        program.SetModelMatrix(twoMatrix);
+        glBindTexture(GL_TEXTURE_2D, twoTextureID);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    } else {
+        program.SetModelMatrix(oneMatrix);
+        glBindTexture(GL_TEXTURE_2D, oneTextureID);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+}
+void drawStart() {
+    program.SetModelMatrix(startMatrix);
+    glBindTexture(GL_TEXTURE_2D, startTextureID);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+void drawLevel() {
+    program.SetModelMatrix(levelMatrix);
+    glBindTexture(GL_TEXTURE_2D, levelTextureID);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+void drawNumbers() {
+    program.SetModelMatrix(levelNums[level].matrix);
+    glBindTexture(GL_TEXTURE_2D, levelNums[level].textureID);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+}
 
 void Render() {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -418,6 +541,16 @@ void Render() {
     for (int i = 0; i < NUM_OF_TILES; i++) {
         drawGround(tileTop[i]);
         drawGround(tileBottom[i]);
+    }
+    if (gameOver) {
+        drawGameOver();
+        drawPlayerWins();
+    }
+    if (!gameStart) {
+        drawStart();
+    } else {
+        drawLevel();
+        drawNumbers();
     }
     
     glDisableVertexAttribArray(program.positionAttribute);
