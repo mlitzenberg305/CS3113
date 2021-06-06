@@ -239,6 +239,13 @@ void ProcessInput() {
         if (keys[SDL_SCANCODE_SPACE] && !gameStart) {
             gameStart = true;
             gameOver = false;
+            level = 1;
+            numOfHits = 0;
+            
+            paddleOne.position = glm::vec3(5.3f, 0.0f, 0.0f);
+            paddleOne.speed = 3.0f;
+            paddleTwo.position = glm::vec3(-5.3f, 0.0f, 0.0f);
+            paddleTwo.speed = 3.0f;
             
             ball.position = glm::vec3(0.0f, 1.5f, 0.0f);
             ball.box.position = ball.position;
@@ -250,6 +257,7 @@ void ProcessInput() {
             xoco.box.position = xoco.position;
             xoco.rotation = 0.0f;
             xoco.matrix = glm::rotate(xoco.matrix, glm::radians(xoco.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+            xoco.speed = 1.0f;
             
             int xPosBall = rand() % 2;
             int yPosBall = rand() % 2;
@@ -324,12 +332,10 @@ void Update() {
         ball.movement = glm::vec3(0.0f, 0.0f, 0.0f);
         gameOver = true;
         gameStart = false;
-        level = 1;
     } else if (ball.position.x - ball.box.size.x / 2 < -5.1) {
         ball.movement = glm::vec3(0.0f, 0.0f, 0.0f);
         gameOver = true;
         gameStart = false;
-        level = 1;
     }
     // paddle one collision top & bottom wall
     if (paddleOne.box.position.y + paddleOne.box.size.y / 2 > 2.75f) {
@@ -381,11 +387,18 @@ void Update() {
     // ball scale
     ball.matrix = glm::scale(ball.matrix, glm::vec3(0.5f, 0.5f, 1.0f));
     
-    // ball speed
+    // ball speed and xoco speed
     if (numOfHits == 5) {
         ball.speed += 0.5f;
         numOfHits = 0;
         level += 1;
+        if (level % 3 == 0) {
+            xoco.speed += (float)level / 2;
+            paddleOne.speed += 1.0f;
+            paddleTwo.speed += 1.0f;
+        } else {
+            xoco.speed = 1.0f;
+        }
     }
     
      //XOCO THINGS
@@ -423,9 +436,16 @@ void Update() {
         float xdistX = fabs(xoco.box.position.x - ball.box.position.x) - ((xoco.box.size.x + ball.box.size.x) / 2.0f);
         float ydistX = fabs(xoco.box.position.y - ball.box.position.y) - ((xoco.box.size.y + ball.box.size.y) / 2.0f);
         if (xdistX < 0 && ydistX < 0) {
-            ball.movement.x = ball.movement.x * -1;
-            ball.movement.y = ball.movement.y * -1;         // reverses direction of ball
-            xoco.movement.y = xoco.movement.y * -1;         // reverses direction of xoco
+            xoco.movement.y = xoco.movement.y * -1;
+            xoco.movement.x = xoco.movement.x * -1;
+            if (xdistX < ydistX) {
+                ball.movement.y = ball.movement.y * -1;
+            } else if (xdistX > ydistX) {
+                ball.movement.x = ball.movement.x * -1;
+            } else {
+                ball.movement.x = ball.movement.x * -1;
+                ball.movement.y = ball.movement.y * -1;
+            }
         }
         // position
         xoco.position += xoco.movement * xoco.speed * deltaTime;
