@@ -310,6 +310,7 @@ void Update() {
         ball.movement.x = ball.movement.x * -1;     // reverses direction
         float hit1 = ball.box.position.y - paddleOne.box.position.y;
         ball.movement.y = hit1 * 1.5;               // changes angle
+        //level += 1; // testing
     }
     
     // ball collision test paddle two
@@ -320,6 +321,7 @@ void Update() {
         ball.movement.x = ball.movement.x * -1;     // reverses direction
         float hit2 = ball.box.position.y - paddleTwo.box.position.y;
         ball.movement.y = hit2 * 1.5;               // changes angle
+        //level += 1; // testing
     }
     // ball collision top & bottom wall
     if (ball.box.position.y + ball.box.size.y / 2 > 3.25f) {
@@ -537,9 +539,24 @@ void drawLevel() {
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 void drawNumbers() {
-    program.SetModelMatrix(levelNums[level].matrix);
-    glBindTexture(GL_TEXTURE_2D, levelNums[level].textureID);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    if (level < 10) {
+        program.SetModelMatrix(levelNums[level].matrix);
+        glBindTexture(GL_TEXTURE_2D, levelNums[level].textureID);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    } else {
+        program.SetModelMatrix(levelNums[level / 10].matrix);
+        glBindTexture(GL_TEXTURE_2D, levelNums[level / 10].textureID);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        
+        if (level % 10 != 0) {
+            program.SetModelMatrix(glm::translate(levelNums[level % 10].matrix, glm::vec3(0.15f, 0.0f, 0.0f)));
+            glBindTexture(GL_TEXTURE_2D, levelNums[level % 10].textureID);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        } else {
+            glBindTexture(GL_TEXTURE_2D, levelNums[0].textureID);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
+    }
 
 }
 
