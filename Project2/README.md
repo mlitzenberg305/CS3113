@@ -1,4 +1,6 @@
 # CS3113 PROJECT TWO: Pong
+![project 2 gif](https://media.giphy.com/media/mUaGQn8PhsUYc9YR9P/giphy.gif)
+
 In this two player game, the right paddle is moved using the up & down arrow keys
 and the left paddle is moved using the W & S keys. The space bar starts or restarts 
 the game. Xoco (my dog) runs around in a random pattern and deflects the kibble
