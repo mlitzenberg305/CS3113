@@ -234,63 +234,64 @@ void ProcessInput() {
         if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
             gameIsRunning = false;
         }
-        // key inputs
-        const Uint8 *keys = SDL_GetKeyboardState(NULL);
-        if (keys[SDL_SCANCODE_SPACE] && !gameStart) {
-            gameStart = true;
-            gameOver = false;
-            level = 1;
-            numOfHits = 0;
-            
-            paddleOne.position = glm::vec3(5.3f, 0.0f, 0.0f);
-            paddleOne.speed = 3.0f;
-            paddleTwo.position = glm::vec3(-5.3f, 0.0f, 0.0f);
-            paddleTwo.speed = 3.0f;
-            
-            ball.position = glm::vec3(0.0f, 1.5f, 0.0f);
-            ball.box.position = ball.position;
-            ball.speed = 3.5;
-            ball.rotation = 0.0f;
-            ball.matrix = glm::rotate(ball.matrix, glm::radians(ball.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-            
-            xoco.position = glm::vec3(0.0f, 0.0f, 0.0f);
-            xoco.box.position = xoco.position;
-            xoco.rotation = 0.0f;
-            xoco.matrix = glm::rotate(xoco.matrix, glm::radians(xoco.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-            xoco.speed = 1.0f;
-            
-            int xPosBall = rand() % 2;
-            int yPosBall = rand() % 2;
-            
-            ball.movement = glm::vec3(1.0f, 0.5f, 0.0f);
-            if (xPosBall == 0) {
-                ball.movement.x = ball.movement.x * -1;
-            }
-            if (yPosBall == 0) {
-                ball.movement.y = ball.movement.y * -1;
-            }
+    }
+    // key inputs
+    const Uint8 *keys = SDL_GetKeyboardState(NULL);
+    
+    if (keys[SDL_SCANCODE_SPACE] && !gameStart) {
+        gameStart = true;
+        gameOver = false;
+        level = 1;
+        numOfHits = 0;
+        
+        paddleOne.position = glm::vec3(5.3f, 0.0f, 0.0f);
+        paddleOne.speed = 3.0f;
+        paddleTwo.position = glm::vec3(-5.3f, 0.0f, 0.0f);
+        paddleTwo.speed = 3.0f;
+        
+        ball.position = glm::vec3(0.0f, 1.5f, 0.0f);
+        ball.box.position = ball.position;
+        ball.speed = 3.5;
+        ball.rotation = 0.0f;
+        ball.matrix = glm::rotate(ball.matrix, glm::radians(ball.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+        
+        xoco.position = glm::vec3(0.0f, 0.0f, 0.0f);
+        xoco.box.position = xoco.position;
+        xoco.rotation = 0.0f;
+        xoco.matrix = glm::rotate(xoco.matrix, glm::radians(xoco.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+        xoco.speed = 1.0f;
+        
+        int xPosBall = rand() % 2;
+        int yPosBall = rand() % 2;
+        
+        ball.movement = glm::vec3(1.0f, 0.5f, 0.0f);
+        if (xPosBall == 0) {
+            ball.movement.x = ball.movement.x * -1;
         }
-        paddleOne.movement = glm::vec3(0, 0, 0);
-        paddleTwo.movement = glm::vec3(0, 0, 0);
-        if (!gameOver && gameStart) {
-            if (keys[SDL_SCANCODE_UP]) {
-                paddleOne.movement.y = 1.0f;
-            }
-            else if (keys[SDL_SCANCODE_DOWN]) {
-                paddleOne.movement.y = -1.0f;
-            }
-            if (keys[SDL_SCANCODE_W]) {
-                paddleTwo.movement.y = 1.0f;
-            }
-            else if (keys[SDL_SCANCODE_S]) {
-                paddleTwo.movement.y = -1.0f;
-            }
-            if (glm::length(paddleOne.movement) > 1.0f) {
-                paddleOne.movement = glm::normalize(paddleOne.movement);
-            }
-            if (glm::length(paddleTwo.movement) > 1.0f) {
-                paddleTwo.movement = glm::normalize(paddleTwo.movement);
-            }
+        if (yPosBall == 0) {
+            ball.movement.y = ball.movement.y * -1;
+        }
+    }
+    paddleOne.movement = glm::vec3(0, 0, 0);
+    paddleTwo.movement = glm::vec3(0, 0, 0);
+    if (!gameOver && gameStart) {
+        if (keys[SDL_SCANCODE_UP]) {
+            paddleOne.movement.y = 1.0f;
+        }
+        else if (keys[SDL_SCANCODE_DOWN]) {
+            paddleOne.movement.y = -1.0f;
+        }
+        if (keys[SDL_SCANCODE_W]) {
+            paddleTwo.movement.y = 1.0f;
+        }
+        else if (keys[SDL_SCANCODE_S]) {
+            paddleTwo.movement.y = -1.0f;
+        }
+        if (glm::length(paddleOne.movement) > 1.0f) {
+            paddleOne.movement = glm::normalize(paddleOne.movement);
+        }
+        if (glm::length(paddleTwo.movement) > 1.0f) {
+            paddleTwo.movement = glm::normalize(paddleTwo.movement);
         }
     }
 }
