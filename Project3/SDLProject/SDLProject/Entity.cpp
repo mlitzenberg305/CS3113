@@ -9,6 +9,11 @@ Entity::Entity()
     width = 1.0f;
     height = 1.0f;
     speed = 0;
+    energy = 0;
+    
+    isActive = GAMEON;
+    repeat = false;
+    rotate = false;
     
     modelMatrix = glm::mat4(1.0f);
 }
@@ -39,6 +44,11 @@ void Entity::CheckCollisionsY(Entity *objects, int objectCount)
                 position.y += penetrationY;
                 velocity.y = 0;
             }
+            if (object->entityType == PLATFORM) {
+                isActive = GAMEOVER;
+            } else if (object->entityType == SUCCESS){
+                isActive = COMPLETE;
+            }
         }
     }
 }
@@ -60,6 +70,11 @@ void Entity::CheckCollisionsX(Entity *objects, int objectCount)
                 position.x += penetrationX;
                 velocity.x = 0;
             }
+            if (object->entityType == PLATFORM) {
+                isActive = GAMEOVER;
+            } else if (object->entityType == SUCCESS){
+                isActive = COMPLETE;
+            }
         }
     }
 }
@@ -67,7 +82,7 @@ void Entity::CheckCollisionsX(Entity *objects, int objectCount)
 void Entity::Update(float deltaTime, Entity *platforms, int platformCount)
 {
     if (entityType == PLAYER) {
-        if (animIndices != NULL) {
+        if (animIndices != NULL && isActive == GAMEON) {
             if (glm::length(movement) != 0 && glm::length(velocity) != 0 ) {
                 
                 animTime += deltaTime;
@@ -103,23 +118,24 @@ void Entity::Update(float deltaTime, Entity *platforms, int platformCount)
             animIndices = animStop;
         }
     }
-    
-//    if (jump) {
-//        jump = false;
-//        velocity.y += jumpPower;
-//    }
-    
-    acceleration.x = movement.x * speed;
-    velocity += acceleration * deltaTime;
-    
-    position.y += velocity.y * deltaTime;           // Move on Y
-    CheckCollisionsY(platforms, platformCount);     // Fix if needed
-    
-    position.x += velocity.x * deltaTime;           // Move on X
-    CheckCollisionsX(platforms, platformCount);     // Fix if needed
+    if (entityType == PLAYER && isActive == GAMEON) {
+        acceleration.x = movement.x * speed;
+        velocity += acceleration * deltaTime;
+        
+        position.y += velocity.y * deltaTime;           // Move on Y
+        CheckCollisionsY(platforms, platformCount);     // Fix if needed
+        
+        position.x += velocity.x * deltaTime;           // Move on X
+        CheckCollisionsX(platforms, platformCount);     // Fix if needed
+    }
     
     modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, position);
+    if (entityType == PLATFORM) {
+        if (rotate) {
+            modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        }
+    }
 }
 
 void Entity::DrawSpriteFromTextureAtlas(ShaderProgram *program, GLuint textureID, int index)
@@ -157,19 +173,59 @@ void Entity::Render(ShaderProgram *program) {
         return;
     }
     
-    float vertices[]  = { -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5 };
-    float texCoords[] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
-    
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    
-    glVertexAttribPointer(program->positionAttribute, 2, GL_FLOAT, false, 0, vertices);
-    glEnableVertexAttribArray(program->positionAttribute);
-    
-    glVertexAttribPointer(program->texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
-    glEnableVertexAttribArray(program->texCoordAttribute);
-    
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    
-    glDisableVertexAttribArray(program->positionAttribute);
-    glDisableVertexAttribArray(program->texCoordAttribute);
+    if (repeat) {
+        if (height != 1) {
+            float vertices[]  = { -1 * (height / 2), -0.5, (height / 2), -0.5, (height / 2), 0.5, -1 * (height / 2), -0.5, (height / 2), 0.5, -1 * (height / 2), 0.5 };
+            float texCoords[] = { 0.0, 1.0, height, 1.0, height, 0.0, 0.0, 1.0, height, 0.0, 0.0, 0.0 };
+            
+            glBindTexture(GL_TEXTURE_2D, textureID);
+            
+            glVertexAttribPointer(program->positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+            glEnableVertexAttribArray(program->positionAttribute);
+            
+            glVertexAttribPointer(program->texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+            glEnableVertexAttribArray(program->texCoordAttribute);
+            
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            
+            glDisableVertexAttribArray(program->positionAttribute);
+            glDisableVertexAttribArray(program->texCoordAttribute);
+            
+        } else if (width != 1) {
+            
+            float vertices[]  = { -1 * (width / 2), -0.5, (width / 2), -0.5, (width / 2), 0.5, -1 * (width / 2), -0.5, (width / 2), 0.5, -1 * (width / 2), 0.5 };
+            float texCoords[] = { 0.0, 1.0, width, 1.0, width, 0.0, 0.0, 1.0, width, 0.0, 0.0, 0.0 };
+            
+            glBindTexture(GL_TEXTURE_2D, textureID);
+            
+            glVertexAttribPointer(program->positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+            glEnableVertexAttribArray(program->positionAttribute);
+            
+            glVertexAttribPointer(program->texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+            glEnableVertexAttribArray(program->texCoordAttribute);
+            
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            
+            glDisableVertexAttribArray(program->positionAttribute);
+            glDisableVertexAttribArray(program->texCoordAttribute);
+        }
+        
+    } else {
+        
+        float vertices[]  = { -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5 };
+        float texCoords[] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
+        
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        
+        glVertexAttribPointer(program->positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+        glEnableVertexAttribArray(program->positionAttribute);
+        
+        glVertexAttribPointer(program->texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+        glEnableVertexAttribArray(program->texCoordAttribute);
+        
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        
+        glDisableVertexAttribArray(program->positionAttribute);
+        glDisableVertexAttribArray(program->texCoordAttribute);
+    }
 }

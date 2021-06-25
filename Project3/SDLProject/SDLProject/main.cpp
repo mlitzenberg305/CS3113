@@ -10,19 +10,24 @@
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
+#include <iostream>
+#include <vector>
+#include <stdlib.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 #include "Entity.h"
 
-#define PLATFORM_COUNT 3
+#define PLATFORM_COUNT 6
 
-enum GameStatus { MENU, ACTIVE, SUCCESS, FAIL };
+enum GameStatus { MENU, ACTIVE, WIN, LOSE };
 
 struct GameState {
     Entity *player;
     Entity *platforms;
+    Entity *missionPlatform;
+    GLuint fontTextureID;
     GameStatus gameStatus;
 };
 
@@ -48,6 +53,9 @@ GLuint LoadTexture(const char* filePath) {
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
     
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     
@@ -55,9 +63,62 @@ GLuint LoadTexture(const char* filePath) {
     return textureID;
 }
 
+void DrawText(ShaderProgram *program, GLuint fontTextureID, std::string text, float size, float spacing, glm::vec3 position) {
+    float width = 1.0f / 16.0f;
+    float height = 1.0f / 16.0f;
+    
+    std::vector<float> vertices;
+    std::vector<float> texCoords;
+    
+    for(int i = 0; i < text.size(); i++) {
+        
+        int index = (int)text[i];
+        float offset = (size + spacing) * i;
+        
+        float u = (float)(index % 16) / 16.0f;
+        float v = (float)(index / 16) / 16.0f;
+        
+        vertices.insert(vertices.end(), {
+            offset + (-0.5f * size), 0.5f * size,
+            offset + (-0.5f * size), -0.5f * size,
+            offset + (0.5f * size), 0.5f * size,
+            offset + (0.5f * size), -0.5f * size,
+            offset + (0.5f * size), 0.5f * size,
+            offset + (-0.5f * size), -0.5f * size,
+        });
+        
+        texCoords.insert(texCoords.end(), {
+            u, v,
+            u, v + height,
+            u + width, v,
+            u + width, v + height,
+            u + width, v,
+            u, v + height,
+        });
+    }
+    
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, position);
+    program->SetModelMatrix(modelMatrix);
+    
+    glUseProgram(program->programID);
+    
+    glVertexAttribPointer(program->positionAttribute, 2, GL_FLOAT, false, 0, vertices.data());
+    glEnableVertexAttribArray(program->positionAttribute);
+    
+    glVertexAttribPointer(program->texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords.data());
+    glEnableVertexAttribArray(program->texCoordAttribute);
+    
+    glBindTexture(GL_TEXTURE_2D, fontTextureID);
+    glDrawArrays(GL_TRIANGLES, 0, (int)(text.size() * 6));
+    
+    glDisableVertexAttribArray(program->positionAttribute);
+    glDisableVertexAttribArray(program->texCoordAttribute);
+}
+
 void Initialize() {
     SDL_Init(SDL_INIT_VIDEO);
-    displayWindow = SDL_CreateWindow("Xoco Lander", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
+    displayWindow = SDL_CreateWindow("Lunar Lander", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
     SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
     SDL_GL_MakeCurrent(displayWindow, context);
     
@@ -92,12 +153,13 @@ void Initialize() {
     state.player = new Entity();
     
     state.player->entityType = PLAYER;
-    state.player->position = glm::vec3(0, 3.0f, 0);
+    state.player->position = glm::vec3(0, 4.0f, 0);
     state.player->width = 0.5f;
     state.player->height = 0.5f;
     state.player->movement = glm::vec3(0);
-    state.player->acceleration = glm::vec3(0, -0.25f, 0);
-    state.player->speed = 0.5f;
+    state.player->acceleration = glm::vec3(0, -0.1f, 0);
+    state.player->speed = 0.25f;
+    state.player->energy = 250;
     state.player->textureID = spriteSheet;
     
     state.player->animLeft = new int[3] {1, 2, 4};
@@ -112,28 +174,62 @@ void Initialize() {
     state.player->animCols = 4;
     state.player->animRows = 3;
     
-    // INITIALIZE PLATFORMS
+    // INITIALIZE DEAD PLATFORMS
     
     state.platforms = new Entity[PLATFORM_COUNT];
     
-    state.platforms[0].textureID = spriteSheet;
-    state.platforms[0].position = glm::vec3(-1.0f, -3.25f, 0.0f);
-    state.platforms[0].animIndices = new int[1] {0};
-    state.platforms[0].animIndex = 0;
-    state.platforms[0].animCols = 4;
-    state.platforms[0].animRows = 3;
+    GLuint platformTextureID = LoadTexture("Assets/individual-textures/dead_tile.png");
     
-    state.platforms[1].textureID = spriteSheet;
-    state.platforms[1].position = glm::vec3(0.0f, -3.25f, 0.0f);
+    state.platforms[0].entityType = PLATFORM;
+    state.platforms[0].textureID = platformTextureID;
+    state.platforms[0].position = glm::vec3(0.0f, -3.25f, 0.0f);
+    state.platforms[0].width = 10.0f;
+    state.platforms[0].repeat = true;
     
-    state.platforms[2].textureID = spriteSheet;
-    state.platforms[2].position = glm::vec3(1.0f, -3.25f, 0.0f);
+    state.platforms[1].entityType = PLATFORM;
+    state.platforms[1].textureID = platformTextureID;
+    state.platforms[1].position = glm::vec3(-4.5f, 0.0f, 0.0f);
+    state.platforms[1].height = 10.0f;
+    state.platforms[1].repeat = true;
+    state.platforms[1].rotate = true;
+    
+    state.platforms[2].entityType = PLATFORM;
+    state.platforms[2].textureID = platformTextureID;
+    state.platforms[2].position = glm::vec3(4.5f, 0.0f, 0.0f);
+    state.platforms[2].height = 10.0f;
+    state.platforms[2].repeat = true;
+    state.platforms[2].rotate = true;
+    
+    state.platforms[3].entityType = PLATFORM;
+    state.platforms[3].textureID = platformTextureID;
+    state.platforms[3].position = glm::vec3(-2.0f, 2.0f, 0.0f);
+    state.platforms[3].width = 5.0f;
+    state.platforms[3].repeat = true;
+    
+    state.platforms[4].entityType = PLATFORM;
+    state.platforms[4].textureID = platformTextureID;
+    state.platforms[4].position = glm::vec3(2.5f, -0.75f, 0.0f);
+    state.platforms[4].width = 3.0f;
+    state.platforms[4].repeat = true;
+    
+    // INITIALIZE MISSION PLATFORM IN A RANDOM SPOT
+    
+    GLuint missionPlatformTextureID = LoadTexture("Assets/individual-textures/safe_tile.png");
+    
+    float missionPlatformX = rand() % 6;
+    missionPlatformX = missionPlatformX - 3;
+    
+    state.platforms[5].entityType = SUCCESS;
+    state.platforms[5].textureID = missionPlatformTextureID;
+    state.platforms[5].position = glm::vec3(missionPlatformX, -3.2f, 0.0f);
+    state.platforms[5].width = 2.0f;
+    state.platforms[5].repeat = true;
     
     // INITIALIZE TEXT
     
-    GLuint textTextureID = LoadTexture("Assets/pixel_font.png");
+    state.fontTextureID = LoadTexture("Assets/pixel_font.png");
     
-    // make the text happen here
+    // UPDATE PLATFORMS
     
     for (int i = 0; i < PLATFORM_COUNT; i++) {
         state.platforms[i].Update(0, NULL, 0);
@@ -148,12 +244,17 @@ void ProcessInput() {
             case SDL_WINDOWEVENT_CLOSE:
                 gameIsRunning = false;
                 break;
-            case SDL_KEYDOWN:
+            case SDL_KEYUP:
                 switch (event.key.keysym.sym) {
                     case SDLK_SPACE:
+                        state.gameStatus = ACTIVE;
                         break;
-                    case SDLK_RIGHT:
-                        break;
+//                    case SDLK_RIGHT:
+//                        state.player->animIndices = state.player->animDown;
+//                        break;
+//                    case SDLK_LEFT:
+//                        state.player->animIndices = state.player->animDown;
+//                        break;
                 }
         }
     }
@@ -163,17 +264,19 @@ void ProcessInput() {
     // key inputs
     const Uint8 *keys = SDL_GetKeyboardState(NULL);
     
-    if (keys[SDL_SCANCODE_LEFT]) {
+    if (keys[SDL_SCANCODE_LEFT] && state.player->energy > 0 && state.gameStatus == ACTIVE) {
         state.player->movement.x = 1.0f;
+        state.player->energy -= 1;
         state.player->animIndices = state.player->animLeft;
     }
-    else if (keys[SDL_SCANCODE_RIGHT]) {
+    else if (keys[SDL_SCANCODE_RIGHT] && state.player->energy > 0 && state.gameStatus == ACTIVE) {
         state.player->movement.x = -1.0f;
+        state.player->energy -= 1;
         state.player->animIndices = state.player->animRight;
     }
-    if (glm::length(state.player->movement) > 1.0f) {
-        state.player->movement = glm::normalize(state.player->movement);
-    }
+//    if (glm::length(state.player->movement) > 1.0f) {
+//        state.player->movement = glm::normalize(state.player->movement);
+//    }
 }
 
 #define FIXED_TIMESTEP 0.0166666f
@@ -192,20 +295,51 @@ void Update() {
     }
     
     while (deltaTime >= FIXED_TIMESTEP) {
-        state.player->Update(FIXED_TIMESTEP, state.platforms, PLATFORM_COUNT);
+        if (state.gameStatus == ACTIVE) {
+            state.player->Update(FIXED_TIMESTEP, state.platforms, PLATFORM_COUNT);
+        }
         deltaTime -= FIXED_TIMESTEP;
     }
+    
     accumulator = deltaTime;
+    
+    if (state.player->isActive == GAMEOVER){
+        state.gameStatus = LOSE;
+        state.player->animIndices = state.player->animStop;
+    } else if (state.player->isActive == COMPLETE){
+        state.gameStatus = WIN;
+        state.player->animIndices = state.player->animStop;
+    }
 }
 
 void Render() {
     glClear(GL_COLOR_BUFFER_BIT);
     
     for (int i = 0; i < PLATFORM_COUNT; i++) {
-        state.platforms[i].Render(&program);
+        if (state.platforms[i].entityType == PLATFORM || state.gameStatus != MENU) {
+            state.platforms[i].Render(&program);
+        }
     }
     
-    state.player->Render(&program);
+    if (state.gameStatus != MENU) {
+        
+        state.player->Render(&program);
+        
+        DrawText(&program, state.fontTextureID, "Fuel: " + std::to_string(state.player->energy), 0.25f, 0.0f, glm::vec3(-4.5f, 3.3, 0));
+        
+        if (state.gameStatus == WIN) {
+            DrawText(&program, state.fontTextureID, "Mission Complete!", 0.55f, 0.0f, glm::vec3(-4.0f, 1.0f, 0));
+            DrawText(&program, state.fontTextureID, "Press Space", 0.5f, 0.0f, glm::vec3(-3.5f, 0.0f, 0));
+            DrawText(&program, state.fontTextureID, "to Start Over", 0.5f, 0.0f, glm::vec3(-3.5f, -1.0f, 0));
+        } else if (state.gameStatus == LOSE) {
+            DrawText(&program, state.fontTextureID, "Mission Failed!", 0.55f, 0.0f, glm::vec3(-4.0f, 1.0f, 0));
+            DrawText(&program, state.fontTextureID, "Press Space", 0.5f, 0.0f, glm::vec3(-3.5f, 0.0f, 0));
+            DrawText(&program, state.fontTextureID, "to Start Over", 0.5f, 0.0f, glm::vec3(-3.5f, -1.0f, 0));
+        }
+    } else {
+        DrawText(&program, state.fontTextureID, "Press Space", 0.5f, 0.0f, glm::vec3(-3.5f, 1.0f, 0));
+        DrawText(&program, state.fontTextureID, "to Begin", 0.5f, 0.0f, glm::vec3(-3.5f, 0.0f, 0));
+    }
     
     SDL_GL_SwapWindow(displayWindow);
 }

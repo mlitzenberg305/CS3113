@@ -11,12 +11,15 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 
-enum EntityType { PLAYER, PLATFORM };
+enum EntityType { PLAYER, PLATFORM, SUCCESS };
+enum EntityStatus { GAMEON, GAMEOVER, COMPLETE };
 
 class Entity {
 public:
     EntityType entityType;
-    bool isActive;
+    EntityStatus isActive;
+    bool repeat;
+    bool rotate;
 
     glm::vec3 position;
     glm::vec3 movement;
@@ -27,6 +30,7 @@ public:
     float height;
     
     float speed;
+    int energy;
     
     GLuint textureID;
     
