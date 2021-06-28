@@ -121,7 +121,7 @@ void Restart() {
     state.player->isActive = GAMEON;
     state.player->velocity = glm::vec3(0);
     state.player->movement = glm::vec3(0);
-    state.player->energy = 250;
+    state.player->energy = 300;
     
     float missionPlatformX = rand() % 6;
     missionPlatformX = missionPlatformX - 3;
@@ -174,7 +174,7 @@ void Initialize() {
     state.player->movement = glm::vec3(0);
     state.player->acceleration = glm::vec3(0, -0.1f, 0);
     state.player->speed = 0.25f;
-    state.player->energy = 250;
+    state.player->energy = 300;
     state.player->textureID = spriteSheet;
     
     state.player->animLeft = new int[3] {1, 2, 4};
