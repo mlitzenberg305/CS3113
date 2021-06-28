@@ -116,6 +116,21 @@ void DrawText(ShaderProgram *program, GLuint fontTextureID, std::string text, fl
     glDisableVertexAttribArray(program->texCoordAttribute);
 }
 
+void Restart() {
+    state.player->position = glm::vec3(0, 4.0f, 0);
+    state.player->isActive = GAMEON;
+    state.player->velocity = glm::vec3(0);
+    state.player->movement = glm::vec3(0);
+    state.player->energy = 250;
+    
+    float missionPlatformX = rand() % 6;
+    missionPlatformX = missionPlatformX - 3;
+    state.platforms[5].position = glm::vec3(missionPlatformX, -3.2f, 0.0f);
+    state.platforms[5].Update(0, NULL, 0);
+    
+    state.gameStatus = ACTIVE;
+}
+
 void Initialize() {
     SDL_Init(SDL_INIT_VIDEO);
     displayWindow = SDL_CreateWindow("Lunar Lander", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
@@ -247,7 +262,12 @@ void ProcessInput() {
             case SDL_KEYUP:
                 switch (event.key.keysym.sym) {
                     case SDLK_SPACE:
-                        state.gameStatus = ACTIVE;
+                        if (state.gameStatus != ACTIVE) {
+                            if (state.gameStatus != MENU) {
+                                Restart();
+                            }
+                            state.gameStatus = ACTIVE;
+                        }
                         break;
 //                    case SDLK_RIGHT:
 //                        state.player->animIndices = state.player->animDown;
