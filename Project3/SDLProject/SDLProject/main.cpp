@@ -294,9 +294,6 @@ void ProcessInput() {
         state.player->energy -= 1;
         state.player->animIndices = state.player->animRight;
     }
-//    if (glm::length(state.player->movement) > 1.0f) {
-//        state.player->movement = glm::normalize(state.player->movement);
-//    }
 }
 
 #define FIXED_TIMESTEP 0.0166666f
