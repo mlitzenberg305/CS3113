@@ -11,15 +11,12 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 
-enum EntityType { PLAYER, PLATFORM, SUCCESS };
-enum EntityStatus { GAMEON, GAMEOVER, COMPLETE };
+enum EntityType { PLAYER, WALL, POINTY, FLYING, BUG, COIN };
 
 class Entity {
 public:
     EntityType entityType;
-    EntityStatus isActive;
-    bool repeat;
-    bool rotate;
+    bool isActive;
 
     glm::vec3 position;
     glm::vec3 movement;
@@ -32,9 +29,19 @@ public:
     float speed;
     int energy;
     
+    bool jump;
+    float jumpPower;
+    
     GLuint textureID;
     
     glm::mat4 modelMatrix;
+    
+    EntityType lastCollision;
+    
+    bool collidedTop;
+    bool collidedBottom;
+    bool collidedLeft;
+    bool collidedRight;
     
     int *animRight = NULL;
     int *animLeft = NULL;
