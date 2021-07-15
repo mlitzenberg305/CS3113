@@ -20,12 +20,11 @@
 #include "Entity.h"
 
 #define GROUND_PLATFORM 11
-#define FLOAT_PLATFORM 3
-#define MOVING_PLATFORM 2
-#define TREES 14
-#define ENEMIES 1
+#define FLOAT_PLATFORM 2
+#define MOVING_PLATFORM 3
+#define ENEMIES 3
 
-#define OTHERS (GROUND_PLATFORM + FLOAT_PLATFORM + MOVING_PLATFORM + TREES)
+#define OTHERS 4
 
 SDL_Window* displayWindow;
 bool gameIsRunning = true;
@@ -37,8 +36,11 @@ enum GameStatus {MENU, ACTIVE, WIN, LOSE};
 
 struct GameState {
     Entity *player;
+    Entity *ground;
+    Entity *floating;
+    Entity *moving;
     Entity *enemies;
-    Entity *others;
+    Entity *not_player;
     GLuint fontTextureID;
     GameStatus gameStatus;
 };
@@ -157,13 +159,13 @@ void Initialize() {
     state.player = new Entity();
     
     state.player->entityType = PLAYER;
-    state.player->position = glm::vec3(-4.0f, 0.0f, 0);
+    state.player->position = glm::vec3(0, 4.0f, 0);
     state.player->width = 1.0f;
     state.player->height = 1.0f;
     state.player->movement = glm::vec3(0);
     state.player->acceleration = glm::vec3(0, -9.8f, 0);
-    state.player->speed = 2.0f;
-    state.player->jumpPower = 7.0f;
+    state.player->speed = 1.0f;
+    state.player->jumpPower = 5.0f;
     state.player->energy = 300;
     state.player->textureID = spriteSheet;
     
@@ -171,7 +173,7 @@ void Initialize() {
     state.player->animRight = new int[2] {0, 1};
     state.player->animUp = new int[2] {1, 0};
 
-    state.player->animIndices = state.player->animRight;
+    state.player->animIndices = state.player->animLeft;
     state.player->animFrames = 2;
     state.player->animIndex = 0;
     state.player->animTime = 0;
@@ -180,141 +182,60 @@ void Initialize() {
     
     state.player->isActive = true;
     
-    // INITIALIZE OTHERS
-    
-    state.others = new Entity[OTHERS];
-    
-    // GROUND PLATFORMS
-    
-    for (int i = 0; i < GROUND_PLATFORM; i++) {
-        state.others[i].entityType = WALL;
-        state.others[i].textureID = tileTextureID;
-        state.others[i].position = glm::vec3((float)(i - (GROUND_PLATFORM / 2)), -3.25f, 0.0f);
-        state.others[i].animStop = new int[1] {22};
-        
-        state.others[i].animIndices = state.others[i].animStop;
-        state.others[i].animFrames = 1;
-        state.others[i].animIndex = 0;
-        state.others[i].animTime = 0;
-        state.others[i].animCols = 20;
-        state.others[i].animRows = 9;
-        
-        state.others[i].isActive = true;
-    }
-    
-    // FLOATING PLATFORMS
-    
-    for (int i = GROUND_PLATFORM; i < (FLOAT_PLATFORM + GROUND_PLATFORM); i++) {
-        state.others[i].entityType = WALL;
-        state.others[i].textureID = tileTextureID;
-        state.others[i].position = glm::vec3((float)(i - GROUND_PLATFORM - 3), -1.0f, 0.0f);
-        state.others[i].animStop = new int[1] {1 + (i - GROUND_PLATFORM)};
-        
-        state.others[i].animIndices = state.others[i].animStop;
-        state.others[i].animFrames = 1;
-        state.others[i].animIndex = 0;
-        state.others[i].animTime = 0;
-        state.others[i].animCols = 20;
-        state.others[i].animRows = 9;
-        
-        state.others[i].isActive = true;
-    }
-    // CLOUD PLATFORMS
-    
-    for (int i = (GROUND_PLATFORM + FLOAT_PLATFORM); i < (FLOAT_PLATFORM + GROUND_PLATFORM + MOVING_PLATFORM); i++) {
-        state.others[i].entityType = WALL;
-        state.others[i].textureID = tileTextureID;
-        state.others[i].position = glm::vec3((float)(i - (GROUND_PLATFORM + FLOAT_PLATFORM)) + 2.0f, 0.0f, 0.0f);
-        // state.others[i].velocity.y = 1.0f;
-        if (MOVING_PLATFORM > 2) {
-            
-            state.others[i].animStop = new int[1] {153 + i - (GROUND_PLATFORM + FLOAT_PLATFORM)};
-            
-        } else if (MOVING_PLATFORM == 2) {
-            
-            if (i == (GROUND_PLATFORM + FLOAT_PLATFORM)) {
-                state.others[i].animStop = new int[1] {153};
-            } else if (i == (GROUND_PLATFORM + FLOAT_PLATFORM) + 1) {
-                state.others[i].animStop = new int[1] {155};
-            }
-            
-        }
-        
-        state.others[i].animIndices = state.others[i].animStop;
-        state.others[i].animFrames = 1;
-        state.others[i].animIndex = 0;
-        state.others[i].animTime = 0;
-        state.others[i].animCols = 20;
-        state.others[i].animRows = 9;
-        
-        // state.others[i].AImove = true;
-        state.others[i].isActive = true;
-    }
-    
-    // TREES
-    
-    for (int i = (GROUND_PLATFORM + FLOAT_PLATFORM + MOVING_PLATFORM); i < (FLOAT_PLATFORM + GROUND_PLATFORM + MOVING_PLATFORM + TREES); i++) {
-        state.others[i].entityType = WALL;
-        state.others[i].textureID = tileTextureID;
-        if (i - (GROUND_PLATFORM + FLOAT_PLATFORM + MOVING_PLATFORM) < TREES / 2) {
-            
-            state.others[i].position = glm::vec3(-5.0f, -2.25f + i - (GROUND_PLATFORM + FLOAT_PLATFORM + MOVING_PLATFORM), 0.0f);
-            
-        } else {
-            
-            state.others[i].position = glm::vec3(5.0f, -2.25f + i - ((TREES / 2) + GROUND_PLATFORM + FLOAT_PLATFORM + MOVING_PLATFORM), 0.0f);
-            
-        }
-        state.others[i].animStop = new int[1] {56};
-        state.others[i].animIndices = state.others[i].animStop;
-        state.others[i].animFrames = 1;
-        state.others[i].animIndex = 0;
-        state.others[i].animTime = 0;
-        state.others[i].animCols = 20;
-        state.others[i].animRows = 9;
-        
-        state.others[i].isActive = true;
-    }
-    
     // INITIALIZE ENEMIES
     
-    state.enemies = new Entity[ENEMIES];
+    // INITIALIZE GROUND PLATFORMS
     
-    for (int i = 0; i < ENEMIES; i++) {
-        state.enemies[i].entityType = BUG;
-        state.enemies[i].aiState = IDLE;
+    state.ground = new Entity[GROUND_PLATFORM];
+    
+    for (int i = 0; i < GROUND_PLATFORM; i++) {
+        state.ground[i].entityType = WALL;
+        state.ground[i].textureID = tileTextureID;
+        state.ground[i].position = glm::vec3((float)(i - (GROUND_PLATFORM / 2)), -3.25f, 0.0f);
+        state.ground[i].animStop = new int[1] {22};
         
-        state.enemies[i].position = glm::vec3(4.0f, 0, 0);
-        state.enemies[i].width = 1.0f;
-        state.enemies[i].height = 1.0f;
-        state.enemies[i].acceleration = glm::vec3(0, -9.8f, 0);
-        state.enemies[i].speed = 0.5f;
-        state.enemies[i].energy = 300;
-        state.enemies[i].textureID = spriteSheet;
+        state.ground[i].animIndices = state.ground[i].animStop;
+        state.ground[i].animFrames = 1;
+        state.ground[i].animIndex = 0;
+        state.ground[i].animTime = 0;
+        state.ground[i].animCols = 20;
+        state.ground[i].animRows = 9;
         
-        state.enemies[i].animLeft = new int[2] {18, 19};
-        state.enemies[i].animRight = new int[2] {18, 19};
-        state.enemies[i].animUp = new int[2] {20, 20};
-
-        state.enemies[i].animIndices = state.enemies->animLeft;
-        state.enemies[i].animFrames = 2;
-        state.enemies[i].animIndex = 0;
-        state.enemies[i].animTime = 0;
-        state.enemies[i].animCols = 9;
-        state.enemies[i].animRows = 3;
+        state.ground[i].isActive = true;
+    }
+    
+    // INITIALIZE FLOATING PLATFORMS
+    
+    state.floating = new Entity[FLOAT_PLATFORM];
+    
+    for (int i = 0; i < FLOAT_PLATFORM; i++) {
+        state.floating[i].entityType = WALL;
+        state.floating[i].textureID = tileTextureID;
+        state.floating[i].position = glm::vec3((float)(i - 2), -1.5f, 0.0f);
+        state.floating[i].animStop = new int[1] {0};
         
-        state.enemies[i].isActive = true;
+        state.floating[i].animIndices = state.ground[i].animStop;
+        state.floating[i].animFrames = 1;
+        state.floating[i].animIndex = 0;
+        state.floating[i].animTime = 0;
+        state.floating[i].animCols = 20;
+        state.floating[i].animRows = 9;
+        
+        state.floating[i].isActive = true;
     }
     
     // INITIALIZE TEXT
     
     state.fontTextureID = LoadTexture("Assets/pixel_font.png");
     
-    // UPDATE PLATFORMS
-    for (int i = 0; i < OTHERS; i++) {
-        if (state.others[i].entityType == WALL) {
-            state.others[i].Update(0, NULL, NULL, 0);
-        }
+    // UPDATE GROUND PLATFORMS
+    for (int i = 0; i < GROUND_PLATFORM; i++) {
+        state.ground[i].Update(0, NULL, 0);
+    }
+    
+    // UPDATE FLOATING PLATFORMS
+    for (int i = 0; i < FLOAT_PLATFORM; i++) {
+        state.floating[i].Update(0, NULL, 0);
     }
 }
 
@@ -331,7 +252,7 @@ void ProcessInput() {
                     case SDLK_SPACE:
                         if (state.player->collidedBottom) {
                             state.player->jump = true;
-                            // state.player->animIndices = state.player->animUp;
+                            state.player->animIndices = state.player->animUp;
                         }
                         break;
                     case SDLK_RIGHT:
@@ -390,10 +311,7 @@ void Update() {
     }
     
     while (deltaTime >= FIXED_TIMESTEP) {
-        state.player->Update(FIXED_TIMESTEP, state.player, state.others, OTHERS);
-        for (int i = 0; i < ENEMIES; i++) {
-            state.enemies[i].Update(FIXED_TIMESTEP, state.player, state.others, OTHERS);
-        }
+        state.player->Update(FIXED_TIMESTEP, state.ground, GROUND_PLATFORM);
         deltaTime -= FIXED_TIMESTEP;
     }
     
@@ -404,11 +322,11 @@ void Update() {
 void Render() {
     glClear(GL_COLOR_BUFFER_BIT);
     
-    for (int i = 0; i < OTHERS; i++) {
-        state.others[i].Render(&program);
+    for (int i = 0; i < GROUND_PLATFORM; i++) {
+        state.ground[i].Render(&program);
     }
-    for (int i = 0; i < ENEMIES; i++) {
-        state.enemies[i].Render(&program);
+    for (int i = 0; i < FLOAT_PLATFORM; i++) {
+        state.floating[i].Render(&program);
     }
     
     state.player->Render(&program);

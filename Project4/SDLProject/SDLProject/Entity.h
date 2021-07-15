@@ -12,10 +12,12 @@
 #include "ShaderProgram.h"
 
 enum EntityType { PLAYER, WALL, POINTY, FLYING, BUG, COIN };
+enum AIState { IDLE, WALKING, ATTACKING };
 
 class Entity {
 public:
     EntityType entityType;
+    AIState aiState;
     bool isActive;
 
     glm::vec3 position;
@@ -61,7 +63,10 @@ public:
     bool CheckCollision(Entity *other);
     void CheckCollisionsY(Entity *objects, int objectCount);
     void CheckCollisionsX(Entity *objects, int objectCount);
-    void Update(float deltaTime, Entity *others, int otherCount);
+    void Update(float deltaTime, Entity *player, Entity *others, int otherCount);
     void Render(ShaderProgram *program);
     void DrawSpriteFromTextureAtlas(ShaderProgram *program, GLuint textureID, int index);
+    void AIPointy(Entity *player);
+    void AIBug(Entity *player);
+    void AIFlying(Entity *player);
 };

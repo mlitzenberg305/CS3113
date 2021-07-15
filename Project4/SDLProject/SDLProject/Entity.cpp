@@ -78,7 +78,40 @@ void Entity::CheckCollisionsX(Entity *objects, int objectCount)
     }
 }
 
-void Entity::Update(float deltaTime, Entity *platforms, int platformCount)
+void Entity::AIBug(Entity *player) {
+    switch (aiState) {
+            
+        case IDLE:
+            movement = glm::vec3(0);
+            if (glm::distance(position, player->position) < 3.0f) {
+                aiState = WALKING;
+            }
+            break;
+        case WALKING:
+
+            if (position.x > player->position.x) {
+                movement = glm::vec3(-1, 0, 0);
+            } else {
+                movement = glm::vec3(1, 0, 0);
+            }
+            if (glm::distance(position, player->position) > 5.0f) {
+                aiState = IDLE;
+            }
+            break;
+        case ATTACKING:
+            break;
+    }
+}
+
+void Entity::AIPointy(Entity *player) {
+    
+}
+
+void Entity::AIFlying(Entity *player) {
+    
+}
+
+void Entity::Update(float deltaTime, Entity *player, Entity *platforms, int platformCount)
 {
     if (!isActive) return;
     
@@ -120,10 +153,39 @@ void Entity::Update(float deltaTime, Entity *platforms, int platformCount)
         CheckCollisionsX(platforms, platformCount);     // Fix if needed
         
     } else if (entityType == POINTY) {
+        AIPointy(player);
 
     } else if (entityType == FLYING) {
+        AIFlying(player);
         
     } else if (entityType == BUG) {
+        AIBug(player);
+        
+        if (animIndices != NULL) {
+            if (glm::length(movement) != 0) {
+                
+                animTime += deltaTime;
+                
+                if (animTime >= 0.1f) {
+                    animTime = 0.0f;
+                    animIndex++;
+                    if (animIndex >= animFrames) {
+                        animIndex = 0;
+                    }
+                }
+            } else {
+                animIndex = 0;
+            }
+        }
+        
+        velocity.x = movement.x * speed;
+        velocity += acceleration * deltaTime;
+        
+        position.y += velocity.y * deltaTime;           // Move on Y
+        CheckCollisionsY(platforms, platformCount);     // Fix if needed
+        
+        position.x += velocity.x * deltaTime;           // Move on X
+        CheckCollisionsX(platforms, platformCount);     // Fix if needed
         
     } else if (entityType == COIN) {
         
@@ -137,10 +199,20 @@ void Entity::Update(float deltaTime, Entity *platforms, int platformCount)
                 }
             }
         }
+//        if (AImove) {
+//            if (position.y >= 3.0f || position.y <= -1.25f) {
+//                velocity.y = velocity.y * -1;
+//            }
+//            
+//            position.y += velocity.y * deltaTime;
+//        }
     }
     
     modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, position);
+    if (movement.x == 1 || animIndices == animRight) {
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(-1.0f, 1.0f, 1.0f));
+    }
 }
 
 void Entity::DrawSpriteFromTextureAtlas(ShaderProgram *program, GLuint textureID, int index)
