@@ -23,7 +23,7 @@
 #define FLOAT_PLATFORM 3
 #define MOVING_PLATFORM 2
 #define TREES 14
-#define ENEMIES 1
+#define ENEMIES 3
 
 #define OTHERS (GROUND_PLATFORM + FLOAT_PLATFORM + MOVING_PLATFORM + TREES)
 
@@ -157,14 +157,14 @@ void Initialize() {
     state.player = new Entity();
     
     state.player->entityType = PLAYER;
-    state.player->position = glm::vec3(-4.0f, 0.0f, 0);
-    state.player->width = 1.0f;
+    state.player->position = glm::vec3(-4.0f, 2.0f, 0);
+    state.player->width = 0.8f;
     state.player->height = 1.0f;
     state.player->movement = glm::vec3(0);
     state.player->acceleration = glm::vec3(0, -9.8f, 0);
     state.player->speed = 2.0f;
     state.player->jumpPower = 7.0f;
-    state.player->energy = 300;
+    state.player->energy = 3;
     state.player->textureID = spriteSheet;
     
     state.player->animLeft = new int[2] {0, 1};
@@ -281,23 +281,53 @@ void Initialize() {
     state.enemies = new Entity[ENEMIES];
     
     for (int i = 0; i < ENEMIES; i++) {
-        state.enemies[i].entityType = BUG;
+        
         state.enemies[i].aiState = IDLE;
         
-        state.enemies[i].position = glm::vec3(4.0f, 0, 0);
+        if (i == 0) {
+            state.enemies[i].entityType = BUG;
+            
+            state.enemies[i].animLeft = new int[2] {21, 22};
+            state.enemies[i].animRight = new int[2] {21, 22};
+            state.enemies[i].animUp = new int[2] {20, 20};
+            
+            state.enemies[i].animFrames = 2;
+            state.enemies[i].animIndices = state.enemies[i].animLeft;
+            
+            state.enemies[i].position = glm::vec3(3.0f, -1.0f, 0);
+            state.enemies[i].acceleration = glm::vec3(0, -9.8f, 0);
+            
+        } else if (i == 1) {
+            state.enemies[i].entityType = FLYING;
+            
+            state.enemies[i].animUp = new int[3] {24, 25, 26};
+            
+            state.enemies[i].animFrames = 3;
+            state.enemies[i].animIndices = state.enemies[i].animUp;
+            
+            state.enemies[i].position = glm::vec3(0.5f, 3.0f, 0);
+            
+        } else if (i == 2) {
+            state.enemies[i].entityType = POINTY;
+            
+            state.enemies[i].animLeft = new int[2] {15, 16};
+            state.enemies[i].animRight = new int[2] {15, 16};
+            state.enemies[i].animUp = new int[2] {17, 17};
+            
+            state.enemies[i].animFrames = 2;
+            state.enemies[i].animIndices = state.enemies[i].animLeft;
+            
+            state.enemies[i].position = glm::vec3(-2.5f, 3.0f, 0);
+            state.enemies[i].acceleration = glm::vec3(0, -9.8f, 0);
+        }
+        
         state.enemies[i].width = 1.0f;
         state.enemies[i].height = 1.0f;
-        state.enemies[i].acceleration = glm::vec3(0, -9.8f, 0);
-        state.enemies[i].speed = 0.5f;
-        state.enemies[i].energy = 300;
-        state.enemies[i].textureID = spriteSheet;
-        
-        state.enemies[i].animLeft = new int[2] {18, 19};
-        state.enemies[i].animRight = new int[2] {18, 19};
-        state.enemies[i].animUp = new int[2] {20, 20};
 
-        state.enemies[i].animIndices = state.enemies->animLeft;
-        state.enemies[i].animFrames = 2;
+        state.enemies[i].speed = 0.5f;
+        state.enemies[i].energy = 1;
+        state.enemies[i].textureID = spriteSheet;
+
         state.enemies[i].animIndex = 0;
         state.enemies[i].animTime = 0;
         state.enemies[i].animCols = 9;
@@ -313,9 +343,12 @@ void Initialize() {
     // UPDATE PLATFORMS
     for (int i = 0; i < OTHERS; i++) {
         if (state.others[i].entityType == WALL) {
-            state.others[i].Update(0, NULL, NULL, 0);
+            state.others[i].Update(0, NULL, NULL, 0, NULL, 0);
         }
     }
+    
+    // SET GAME STATE
+    state.gameStatus = MENU;
 }
 
 void ProcessInput() {
@@ -329,9 +362,12 @@ void ProcessInput() {
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
                     case SDLK_SPACE:
-                        if (state.player->collidedBottom) {
-                            state.player->jump = true;
-                            // state.player->animIndices = state.player->animUp;
+                        if (state.gameStatus == MENU) {
+                            state.gameStatus = ACTIVE;
+                        } else if (state.gameStatus == ACTIVE){
+                            if (state.player->collidedBottom) {
+                                state.player->jump = true;
+                            }
                         }
                         break;
                     case SDLK_RIGHT:
@@ -343,7 +379,7 @@ void ProcessInput() {
             case SDL_KEYUP:
                 switch (event.key.keysym.sym) {
                     case SDLK_SPACE:
-                        state.player->animIndices = state.player->animLeft;
+                        // state.player->animIndices = state.player->animLeft;
                         break;
                     case SDLK_RIGHT:
                         break;
@@ -379,10 +415,13 @@ float lastTicks = 0;
 float accumulator = 0.0f;
 
 void Update() {
+    if (state.gameStatus != ACTIVE) return;
+    
     float ticks = (float)SDL_GetTicks() / 1000.0f;
     float deltaTime = ticks - lastTicks;
     lastTicks = ticks;
     deltaTime += accumulator;
+    int activeEnemies = ENEMIES;
     
     if (deltaTime < FIXED_TIMESTEP) {
         accumulator = deltaTime;
@@ -390,15 +429,22 @@ void Update() {
     }
     
     while (deltaTime >= FIXED_TIMESTEP) {
-        state.player->Update(FIXED_TIMESTEP, state.player, state.others, OTHERS);
+        state.player->Update(FIXED_TIMESTEP, state.player, state.others, OTHERS, state.enemies, ENEMIES);
         for (int i = 0; i < ENEMIES; i++) {
-            state.enemies[i].Update(FIXED_TIMESTEP, state.player, state.others, OTHERS);
+            state.enemies[i].Update(FIXED_TIMESTEP, state.player, state.others, OTHERS, state.enemies, ENEMIES);
+            if (state.enemies[i].isActive == false) {
+                activeEnemies --;
+            }
         }
         deltaTime -= FIXED_TIMESTEP;
     }
     
     accumulator = deltaTime;
-    
+    if (!state.player->isActive) {
+        state.gameStatus = LOSE;
+    } else if (activeEnemies == 0) {
+        state.gameStatus = WIN;
+    }
 }
 
 void Render() {
@@ -407,11 +453,38 @@ void Render() {
     for (int i = 0; i < OTHERS; i++) {
         state.others[i].Render(&program);
     }
-    for (int i = 0; i < ENEMIES; i++) {
-        state.enemies[i].Render(&program);
-    }
     
-    state.player->Render(&program);
+    // DrawText(&program, state.fontTextureID, "Health: " + std::to_string(state.player->energy), 0.25f, 0.0f, glm::vec3(-4.25f, 3.3, 0));
+    switch (state.gameStatus) {
+        case MENU:
+            DrawText(&program, state.fontTextureID, "Press Space", 0.5f, 0.0f, glm::vec3(-2.0f, 1.0f, 0));
+            break;
+        case ACTIVE:
+            DrawText(&program, state.fontTextureID, "Kill all the AI!", 0.25f, 0.0f, glm::vec3(-3.25f, 3.3, 0));
+            
+            for (int i = 0; i < ENEMIES; i++) {
+                state.enemies[i].Render(&program);
+            }
+            
+            state.player->Render(&program);
+            break;
+        case WIN:
+            for (int i = 0; i < ENEMIES; i++) {
+                state.enemies[i].Render(&program);
+            }
+            
+            state.player->Render(&program);
+            DrawText(&program, state.fontTextureID, "You Win!", 0.5f, 0.0f, glm::vec3(-1.8f, 1.0f, 0));
+            break;
+        case LOSE:
+            for (int i = 0; i < ENEMIES; i++) {
+                state.enemies[i].Render(&program);
+            }
+            
+            state.player->Render(&program);
+            DrawText(&program, state.fontTextureID, "You Lose!", 0.5f, 0.0f, glm::vec3(-1.8f, 1.0f, 0));
+            break;
+    }
     
     SDL_GL_SwapWindow(displayWindow);
 }

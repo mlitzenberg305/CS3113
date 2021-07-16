@@ -11,7 +11,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 
-enum EntityType { PLAYER, WALL, POINTY, FLYING, BUG, COIN };
+enum EntityType { PLAYER, WALL, POINTY, FLYING, BUG };
 enum AIState { IDLE, WALKING, ATTACKING };
 
 class Entity {
@@ -61,11 +61,12 @@ public:
     Entity();
     
     bool CheckCollision(Entity *other);
-    void CheckCollisionsY(Entity *objects, int objectCount);
-    void CheckCollisionsX(Entity *objects, int objectCount);
-    void Update(float deltaTime, Entity *player, Entity *others, int otherCount);
+    void CheckCollisionsY(Entity *objects, int objectCount, Entity *enemies, int enemyCount);
+    void CheckCollisionsX(Entity *objects, int objectCount, Entity *enemies, int enemyCount);
+    void Update(float deltaTime, Entity *player, Entity *others, int otherCount, Entity* enemies, int enemyCount);
     void Render(ShaderProgram *program);
     void DrawSpriteFromTextureAtlas(ShaderProgram *program, GLuint textureID, int index);
+    void AI(Entity *player);
     void AIPointy(Entity *player);
     void AIBug(Entity *player);
     void AIFlying(Entity *player);

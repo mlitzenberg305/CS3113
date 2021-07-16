@@ -20,6 +20,7 @@ Entity::Entity()
 bool Entity::CheckCollision(Entity *other) {
     
     if (!isActive || !other->isActive) return false;
+    if (this == other) return false;
     
     float xdist = fabs(position.x - other->position.x) - ((width + other->width) / 2.0f);
     float ydist = fabs(position.y - other->position.y) - ((height + other->height) / 2.0f);
@@ -32,7 +33,7 @@ bool Entity::CheckCollision(Entity *other) {
     return false;
 }
 
-void Entity::CheckCollisionsY(Entity *objects, int objectCount)
+void Entity::CheckCollisionsY(Entity *objects, int objectCount, Entity *enemies, int enemyCount)
 {
     for (int i = 0; i < objectCount; i++)
     {
@@ -53,9 +54,31 @@ void Entity::CheckCollisionsY(Entity *objects, int objectCount)
             }
         }
     }
+    for (int i = 0; i < enemyCount; i++)
+    {
+            Entity* enemy = &enemies[i];
+
+            if (CheckCollision(enemy)) {
+                if (velocity.y > 0) {
+                    velocity.y = 0;
+                    collidedTop = true;
+                }
+                else if (velocity.y < 0) {
+                    velocity.y = 0;
+                    collidedBottom = true;
+                }
+                if (collidedTop) {
+                    isActive = false;
+                }
+                else if (collidedBottom) {
+                    enemy->isActive = false;
+                    velocity.y = 2.0f;
+                }
+            }
+        }
 }
 
-void Entity::CheckCollisionsX(Entity *objects, int objectCount)
+void Entity::CheckCollisionsX(Entity *objects, int objectCount, Entity *enemies, int enemyCount)
 {
     for (int i = 0; i < objectCount; i++)
     {
@@ -76,6 +99,26 @@ void Entity::CheckCollisionsX(Entity *objects, int objectCount)
             }
         }
     }
+    for (int i = 0; i < enemyCount; i++)
+    {
+            Entity* enemy = &enemies[i];
+
+            if (CheckCollision(enemy))
+            {
+                
+                if (velocity.x > 0) {
+                    velocity.x = 0;
+                    collidedRight = true;
+                }
+                else if (velocity.x < 0) {
+                    velocity.x = 0;
+                    collidedLeft = true;
+                }
+                if (collidedRight || collidedLeft) {
+                    isActive = false;
+                }
+            }
+        }
 }
 
 void Entity::AIBug(Entity *player) {
@@ -90,11 +133,13 @@ void Entity::AIBug(Entity *player) {
         case WALKING:
 
             if (position.x > player->position.x) {
-                movement = glm::vec3(-1, 0, 0);
+                movement.x = -1;
+            } else if (position.x - player->position.x < 0.1 || position.x - player->position.x > -0.1){
+                movement.x = 0;
             } else {
-                movement = glm::vec3(1, 0, 0);
+                movement.x = 1;
             }
-            if (glm::distance(position, player->position) > 5.0f) {
+            if (glm::distance(position, player->position) > 4.0f) {
                 aiState = IDLE;
             }
             break;
@@ -105,108 +150,122 @@ void Entity::AIBug(Entity *player) {
 
 void Entity::AIPointy(Entity *player) {
     
+    switch (aiState) {
+            
+        case IDLE:
+            movement.x = 1.0f;
+            aiState = WALKING;
+            break;
+        case WALKING:
+            
+            speed = 0.5f;
+            
+            if (position.y <= player->position.y) {
+                aiState = ATTACKING;
+            }
+            if (position.x <= -3.0f || position.x >= -1.0f) { // not sure how to implement the pit check here
+                movement.x = movement.x * -1;
+            }
+            break;
+        case ATTACKING:
+            speed = 1;
+            
+            if (player->position.y < position.y) {
+                aiState = WALKING;
+            }
+            if (player->position.x > position.x){
+                movement.x = 1;
+            } else {
+                movement.x = -1;
+            }
+            break;
+    }
 }
 
 void Entity::AIFlying(Entity *player) {
-    
+    switch (aiState) {
+        case IDLE:
+            movement.y = -1.0f;
+            aiState = WALKING;
+            break;
+        case WALKING:
+            if (position.y > 3.0) {
+                movement.y = movement.y * -1;
+            } else if (position.y < -1.0) {
+                movement.y = movement.y * -1;
+            }
+            break;
+        case ATTACKING:
+            break;
+    }
 }
 
-void Entity::Update(float deltaTime, Entity *player, Entity *platforms, int platformCount)
+void Entity::AI(Entity *player) {
+    switch (entityType) {
+        case BUG:
+            AIBug(player);
+            break;
+        case POINTY:
+            AIPointy(player);
+            break;
+        case FLYING:
+            AIFlying(player);
+            break;
+        case WALL:
+            break;
+        case PLAYER:
+            break;
+    }
+}
+
+void Entity::Update(float deltaTime, Entity *player, Entity *platforms, int platformCount, Entity* enemies, int enemyCount)
 {
-    if (!isActive) return;
+    if (isActive == false) return;
     
     collidedTop = false;
     collidedBottom = false;
     collidedLeft = false;
     collidedRight = false;
     
-    if (entityType == PLAYER) {
-        if (animIndices != NULL) {
-            if (glm::length(movement) != 0) {
-                
-                animTime += deltaTime;
-                
-                if (animTime >= 0.1f) {
-                    animTime = 0.0f;
-                    animIndex++;
-                    if (animIndex >= animFrames) {
-                        animIndex = 0;
-                    }
-                }
-            } else {
-                animIndex = 0;
-            }
-        }
-        
-        if (jump) {
-            jump = false;
-            velocity.y += jumpPower;
-        }
-        
-        velocity.x = movement.x * speed;
-        velocity += acceleration * deltaTime;
-        
-        position.y += velocity.y * deltaTime;           // Move on Y
-        CheckCollisionsY(platforms, platformCount);     // Fix if needed
-        
-        position.x += velocity.x * deltaTime;           // Move on X
-        CheckCollisionsX(platforms, platformCount);     // Fix if needed
-        
-    } else if (entityType == POINTY) {
-        AIPointy(player);
+    if (entityType != PLAYER || entityType != WALL) {
+        AI(player);
+    }
+    
+    if (animIndices != NULL) {
+        if (glm::length(movement) != 0) {
+            animTime += deltaTime;
 
-    } else if (entityType == FLYING) {
-        AIFlying(player);
-        
-    } else if (entityType == BUG) {
-        AIBug(player);
-        
-        if (animIndices != NULL) {
-            if (glm::length(movement) != 0) {
-                
-                animTime += deltaTime;
-                
-                if (animTime >= 0.1f) {
-                    animTime = 0.0f;
-                    animIndex++;
-                    if (animIndex >= animFrames) {
-                        animIndex = 0;
-                    }
-                }
-            } else {
-                animIndex = 0;
-            }
-        }
-        
-        velocity.x = movement.x * speed;
-        velocity += acceleration * deltaTime;
-        
-        position.y += velocity.y * deltaTime;           // Move on Y
-        CheckCollisionsY(platforms, platformCount);     // Fix if needed
-        
-        position.x += velocity.x * deltaTime;           // Move on X
-        CheckCollisionsX(platforms, platformCount);     // Fix if needed
-        
-    } else if (entityType == COIN) {
-        
-    } else if (entityType == WALL) {
-        if (animIndices != NULL) {
-            if (animTime >= 0.25f) {
+            if (animTime >= 0.25f)
+            {
                 animTime = 0.0f;
                 animIndex++;
-                if (animIndex >= animFrames) {
+                if (animIndex >= animFrames)
+                {
                     animIndex = 0;
                 }
             }
+        } else {
+            animIndex = 0;
         }
-//        if (AImove) {
-//            if (position.y >= 3.0f || position.y <= -1.25f) {
-//                velocity.y = velocity.y * -1;
-//            }
-//            
-//            position.y += velocity.y * deltaTime;
-//        }
     }
+    
+    if (jump) {
+        jump = false;
+        velocity.y += jumpPower;
+    }
+    
+    velocity.x = movement.x * speed;
+    if (entityType == FLYING) {
+        velocity.y = movement.y * speed;
+    }
+    velocity += acceleration * deltaTime;
+    
+    position.y += velocity.y * deltaTime; // Move on Y
+    CheckCollisionsY(platforms, platformCount, enemies, enemyCount);// Fix if needed
+    
+    position.x += velocity.x * deltaTime; // Move on X
+    CheckCollisionsX(platforms, platformCount, enemies,
+                     enemyCount);// Fix if needed
     
     modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, position);
@@ -244,7 +303,7 @@ void Entity::DrawSpriteFromTextureAtlas(ShaderProgram *program, GLuint textureID
 
 void Entity::Render(ShaderProgram *program) {
     
-    if (!isActive) return;
+    if (!isActive && this->entityType != PLAYER) return;
     
     program->SetModelMatrix(modelMatrix);
     
