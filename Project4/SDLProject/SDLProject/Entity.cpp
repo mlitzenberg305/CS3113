@@ -160,7 +160,7 @@ void Entity::AIPointy(Entity *player) {
             
             speed = 0.5f;
             
-            if (position.y <= player->position.y) {
+            if (glm::distance(position, player->position) < 1.0f) {
                 aiState = ATTACKING;
             }
             if (position.x <= -3.0f || position.x >= -1.0f) { // not sure how to implement the pit check here
@@ -170,13 +170,8 @@ void Entity::AIPointy(Entity *player) {
         case ATTACKING:
             speed = 1;
             
-            if (player->position.y < position.y) {
+            if (glm::distance(position, player->position) > 2.0f) {
                 aiState = WALKING;
-            }
-            if (player->position.x > position.x){
-                movement.x = 1;
-            } else {
-                movement.x = -1;
             }
             break;
     }
