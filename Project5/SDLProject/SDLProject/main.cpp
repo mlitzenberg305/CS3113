@@ -124,7 +124,7 @@ void ProcessInput() {
                         break;
                     case SDLK_RETURN:
                         if (currentScene == sceneList[0]) {
-                            currentScene->state.nextScene = 1;
+                            currentScene->state.nextScene = 3;
                         }
                         break;
                 }
