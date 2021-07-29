@@ -3,7 +3,7 @@
 #define LEVEL_WIDTH 41
 #define LEVEL_HEIGHT 8
 
-#define LEVEL_ENEMY_COUNT 1
+#define LEVEL_ENEMY_COUNT 2
 
 unsigned int level2_data[] =
 {
@@ -52,7 +52,36 @@ void Level2::Initialize() {
     
     state.player->isActive = true;
     
-    // add enemies
+    state.enemies = new Entity[LEVEL_ENEMY_COUNT];
+    
+    for (int i = 0; i < LEVEL_ENEMY_COUNT; i++) {
+        state.enemies[i].aiState = IDLE;
+        state.enemies[i].aiType = WALKER;
+        
+        state.enemies[i].width = 1.0f;
+        state.enemies[i].height = 1.0f;
+
+        state.enemies[i].speed = 1.0f;
+        state.enemies[i].energy = 1;
+        state.enemies[i].textureID = spriteSheet;
+
+        state.enemies[i].animIndex = 0;
+        state.enemies[i].animTime = 0;
+        state.enemies[i].animCols = 9;
+        state.enemies[i].animRows = 3;
+        
+        state.enemies[i].animLeft = new int[2] {21, 22};
+        state.enemies[i].animRight = new int[2] {21, 22};
+        state.enemies[i].animUp = new int[2] {20, 20};
+        
+        state.enemies[i].animFrames = 2;
+        state.enemies[i].animIndices = state.enemies[i].animLeft;
+        
+        state.enemies[i].position = glm::vec3(27.0f, -1.0f, 0);
+        state.enemies[i].acceleration = glm::vec3(0, -9.8f, 0);
+        
+        state.enemies[i].isActive = false;
+    }
 }
 
 void Level2::Update(float deltaTime) {

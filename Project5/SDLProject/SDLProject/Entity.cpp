@@ -187,11 +187,13 @@ void Entity::CheckCollisionsY(Entity *objects, int objectCount)
                 position.y -= penetrationY;
                 velocity.y = 0;
                 collidedTop = true;
+                energy --;
             }
             else if (velocity.y < 0) {
                 position.y += penetrationY;
-                velocity.y = 0;
+                velocity.y = 4;
                 collidedBottom = true;
+                object->isActive = false;
             }
         }
     }
@@ -210,11 +212,13 @@ void Entity::CheckCollisionsX(Entity *objects, int objectCount)
                 position.x -= penetrationX;
                 velocity.x = 0;
                 collidedRight = true;
+                energy --;
             }
             else if (velocity.x < 0) {
                 position.x += penetrationX;
                 velocity.x = 0;
                 collidedLeft = true;
+                energy --;
             }
         }
     }
@@ -223,10 +227,12 @@ void Entity::CheckCollisionsX(Entity *objects, int objectCount)
 void Entity::AIWalker(Entity *player) {
     switch (aiState) {
         case IDLE:
-
+            if (fabs(player->position.x - position.x) < 3) {
+                aiState = WALKING;
+            }
             break;
         case WALKING:
-
+            velocity.x = -1.0;
             break;
         case ATTACKING:
             break;
@@ -236,7 +242,7 @@ void Entity::AIWalker(Entity *player) {
 void Entity::AI(Entity *player) {
     switch (aiType) {
         case WALKER:
-
+            AIWalker(player);
             break;
         case WAITANDGO:
 
@@ -290,11 +296,11 @@ void Entity::Update(float deltaTime, Entity *player, Entity *objects, int objCou
     
     position.y += velocity.y * deltaTime; // Move on Y
     CheckCollisionsY(map);
-    //CheckCollisionsY(platforms, platformCount, enemies, enemyCount);
+    CheckCollisionsY(objects, objCount);
     
     position.x += velocity.x * deltaTime; // Move on X
     CheckCollisionsX(map);
-    //CheckCollisionsX(platforms, platformCount, enemies, enemyCount);
+    CheckCollisionsX(objects, objCount);
     
     modelMatrix = glm::translate(modelMatrix, position);
     if (movement.x == 1 || animIndices == animRight) {
@@ -331,7 +337,7 @@ void Entity::DrawSpriteFromTextureAtlas(ShaderProgram *program, GLuint textureID
 
 void Entity::Render(ShaderProgram *program) {
     
-    if (!isActive && this->entityType != PLAYER) return;
+    if (!isActive) return;
     
     program->SetModelMatrix(modelMatrix);
     
