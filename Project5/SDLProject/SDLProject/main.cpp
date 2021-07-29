@@ -20,6 +20,8 @@
 
 #include "Scene.h"
 #include "Menu.h"
+#include "Win.h"
+#include "Lose.h"
 #include "Level1.h"
 #include "Level2.h"
 #include "Level3.h"
@@ -33,8 +35,10 @@ glm::mat4 viewMatrix, projectionMatrix, uiViewMatrix, uiProjectionMatrix, modelM
 GLuint heartTextureID;
 GLuint deadHeartTextureID;
 
+int player_lives = 3;
+
 Scene *currentScene;
-Scene *sceneList[4];
+Scene *sceneList[6];
 
 void SwitchToScene(Scene *scene) {
     currentScene = scene;
@@ -79,6 +83,8 @@ void Initialize() {
     sceneList[1] = new Level1();
     sceneList[2] = new Level2();
     sceneList[3] = new Level3();
+    sceneList[4] = new Win();
+    sceneList[5] = new Lose();
     
     SwitchToScene(sceneList[0]);
 
@@ -125,6 +131,13 @@ void ProcessInput() {
                     case SDLK_RETURN:
                         if (currentScene == sceneList[0]) {
                             currentScene->state.nextScene = 1;
+                        } else if (currentScene == sceneList[4] || currentScene == sceneList[5]) {
+                            currentScene->state.nextScene = 0;
+                            player_lives = 3;
+                            
+                            sceneList[1] = new Level1();
+                            sceneList[2] = new Level2();
+                            sceneList[3] = new Level3();
                         }
                         break;
                 }
@@ -157,6 +170,9 @@ float lastTicks = 0;
 float accumulator = 0.0f;
 
 void Update() {
+    if (currentScene->state.player->energy == -1) {
+        currentScene->state.player->energy = player_lives;
+    }
     
     float ticks = (float)SDL_GetTicks() / 1000.0f;
     float deltaTime = ticks - lastTicks;
@@ -179,18 +195,21 @@ void Update() {
     
     if (currentScene->state.player->nextLevel == true) {
         if (sceneList[1] == currentScene) {
+            player_lives = currentScene->state.player->energy;
             currentScene->state.nextScene = 2;
         } else if (sceneList[2] == currentScene) {
+            player_lives = currentScene->state.player->energy;
             currentScene->state.nextScene = 3;
         } else if (sceneList[3] == currentScene){
-            currentScene->state.nextScene = 0;
+            currentScene->state.nextScene = 4;
         }
+    } else if (currentScene->state.gameStatus == LOSE) {
+        currentScene->state.nextScene = 5;
     }
     
     viewMatrix = glm::mat4(1.0f);
-    
     if (currentScene != sceneList[3]) {
-        if (currentScene->state.player->position.x > 5 && currentScene->state.player->position.x < 35) {
+        if (currentScene->state.player->position.x >= 5 && currentScene->state.player->position.x <= 35) {
             viewMatrix = glm::translate(viewMatrix, glm::vec3(-currentScene->state.player->position.x, 3.75, 0));
         } else if (currentScene->state.player->position.x < 5) {
             viewMatrix = glm::translate(viewMatrix, glm::vec3(-5, 3.75, 0));
@@ -198,7 +217,7 @@ void Update() {
             viewMatrix = glm::translate(viewMatrix, glm::vec3(-35, 3.75, 0));
         }
     } else {
-        if (currentScene->state.player->position.x > 5 && currentScene->state.player->position.x < 45) {
+        if (currentScene->state.player->position.x >= 5 && currentScene->state.player->position.x <= 45) {
             viewMatrix = glm::translate(viewMatrix, glm::vec3(-currentScene->state.player->position.x, 3.75, 0));
         } else if (currentScene->state.player->position.x < 5) {
             viewMatrix = glm::translate(viewMatrix, glm::vec3(-5, 3.75, 0));
@@ -219,7 +238,7 @@ void Render() {
     program.SetProjectionMatrix(uiProjectionMatrix);
     program.SetViewMatrix(uiViewMatrix);
     
-    if (sceneList[0] != currentScene) {
+    if (currentScene != sceneList[0] && currentScene != sceneList[4] && currentScene != sceneList[5]) {
         
         if (currentScene->state.player->energy == 3) {
             for (int i = 0; i < 3; i++) {
@@ -260,7 +279,7 @@ int main(int argc, char* argv[]) {
         ProcessInput();
         Update();
         
-        if (currentScene->state.nextScene >=0) SwitchToScene(sceneList[currentScene->state.nextScene]);
+        if (currentScene->state.nextScene >= 0) SwitchToScene(sceneList[currentScene->state.nextScene]);
         
         Render();
     }

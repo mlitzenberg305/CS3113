@@ -10,6 +10,8 @@
 		280A287226911E2C0052B28D /* Entity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 280A287126911E2C0052B28D /* Entity.cpp */; };
 		280A28742694E2BB0052B28D /* Assets in CopyFiles */ = {isa = PBXBuildFile; fileRef = 280A28732694E2BB0052B28D /* Assets */; };
 		280A287726A773B10052B28D /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 280A287526A773B10052B28D /* Map.cpp */; };
+		28D2C87826B24B6C00E3FFAB /* Win.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28D2C87626B24B6C00E3FFAB /* Win.cpp */; };
+		28D2C87B26B24B7600E3FFAB /* Lose.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28D2C87926B24B7600E3FFAB /* Lose.cpp */; };
 		28ECE1A826ADE42A00D374BE /* Util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28ECE1A626ADE42A00D374BE /* Util.cpp */; };
 		28ECE1AB26ADEA4F00D374BE /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28ECE1A926ADEA4F00D374BE /* Scene.cpp */; };
 		28ECE1AE26AF98F300D374BE /* Level1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28ECE1AC26AF98F300D374BE /* Level1.cpp */; };
@@ -46,6 +48,10 @@
 		280A28732694E2BB0052B28D /* Assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Assets; sourceTree = "<group>"; };
 		280A287526A773B10052B28D /* Map.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Map.cpp; sourceTree = "<group>"; };
 		280A287626A773B10052B28D /* Map.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Map.h; sourceTree = "<group>"; };
+		28D2C87626B24B6C00E3FFAB /* Win.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Win.cpp; sourceTree = "<group>"; };
+		28D2C87726B24B6C00E3FFAB /* Win.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Win.h; sourceTree = "<group>"; };
+		28D2C87926B24B7600E3FFAB /* Lose.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Lose.cpp; sourceTree = "<group>"; };
+		28D2C87A26B24B7600E3FFAB /* Lose.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Lose.h; sourceTree = "<group>"; };
 		28ECE1A626ADE42A00D374BE /* Util.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Util.cpp; sourceTree = "<group>"; };
 		28ECE1A726ADE42A00D374BE /* Util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
 		28ECE1A926ADEA4F00D374BE /* Scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Scene.cpp; sourceTree = "<group>"; };
@@ -131,6 +137,10 @@
 				28ECE1B326AFC55600D374BE /* Level3.h */,
 				28ECE1B526AFC77E00D374BE /* Menu.cpp */,
 				28ECE1B626AFC77E00D374BE /* Menu.h */,
+				28D2C87626B24B6C00E3FFAB /* Win.cpp */,
+				28D2C87726B24B6C00E3FFAB /* Win.h */,
+				28D2C87926B24B7600E3FFAB /* Lose.cpp */,
+				28D2C87A26B24B7600E3FFAB /* Lose.h */,
 			);
 			path = SDLProject;
 			sourceTree = "<group>";
@@ -203,6 +213,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				28D2C87B26B24B7600E3FFAB /* Lose.cpp in Sources */,
+				28D2C87826B24B6C00E3FFAB /* Win.cpp in Sources */,
 				28ECE1AB26ADEA4F00D374BE /* Scene.cpp in Sources */,
 				DBDF1B532323DE3F007CECB1 /* main.cpp in Sources */,
 				280A287226911E2C0052B28D /* Entity.cpp in Sources */,

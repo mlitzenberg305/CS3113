@@ -14,7 +14,7 @@
 #include "Entity.h"
 #include "Map.h"
 
-enum GameStatus { LOADING, ACTIVE, WIN, LOSE };
+enum GameStatus { WIN, LOSE };
 
 struct GameState {
     Map *map;

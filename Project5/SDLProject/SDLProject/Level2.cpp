@@ -37,7 +37,6 @@ void Level2::Initialize() {
     state.player->acceleration = glm::vec3(0, -9.8f, 0);
     state.player->speed = 2.0f;
     state.player->jumpPower = 5.5f;
-    state.player->energy = 3;
     state.player->textureID = spriteSheet;
     
     state.player->animLeft = new int[2] {0, 1};
@@ -58,6 +57,9 @@ void Level2::Initialize() {
 
 void Level2::Update(float deltaTime) {
     state.player->Update(deltaTime, state.player, state.enemies, LEVEL_ENEMY_COUNT, state.map);
+    if (state.player->energy == 0) {
+        state.gameStatus = LOSE;
+    }
 }
 
 void Level2::Render(ShaderProgram *program) {

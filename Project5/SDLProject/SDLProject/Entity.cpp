@@ -10,7 +10,7 @@ Entity::Entity()
     height = 1.0f;
     speed = 0;
     jumpPower = 0;
-    energy = 0;
+    energy = -1;
     
     isActive = false;
     inWater = false;
@@ -77,25 +77,16 @@ void Entity::CheckCollisionsY(Map *map) {
             position.y -= penetration_y;
             velocity.y = 0;
             collidedTop = true;
-            if (top_isSolid == 6) {
-                nextLevel = true;
-            }
         }
         else if (top_left_isSolid > 0 && velocity.y > 0 && top_left_isSolid != 2 && top_left_isSolid != 3) {
             position.y -= penetration_y;
             velocity.y = 0;
             collidedTop = true;
-            if (top_left_isSolid == 6) {
-                nextLevel = true;
-            }
         }
         else if (top_right_isSolid > 0 && velocity.y > 0 && top_right_isSolid != 2 && top_right_isSolid != 3) {
             position.y -= penetration_y;
             velocity.y = 0;
             collidedTop = true;
-            if (top_right_isSolid == 6) {
-                nextLevel = true;
-            }
         }
         
         if (bottom_isSolid > 0 && velocity.y < 0) {
