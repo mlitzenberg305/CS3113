@@ -124,7 +124,7 @@ void ProcessInput() {
                         break;
                     case SDLK_RETURN:
                         if (currentScene == sceneList[0]) {
-                            currentScene->state.nextScene = 3;
+                            currentScene->state.nextScene = 1;
                         }
                         break;
                 }
@@ -177,12 +177,34 @@ void Update() {
     
     accumulator = deltaTime;
     
+    if (currentScene->state.player->nextLevel == true) {
+        if (sceneList[1] == currentScene) {
+            currentScene->state.nextScene = 2;
+        } else if (sceneList[2] == currentScene) {
+            currentScene->state.nextScene = 3;
+        } else if (sceneList[3] == currentScene){
+            currentScene->state.nextScene = 0;
+        }
+    }
+    
     viewMatrix = glm::mat4(1.0f);
     
-    if (currentScene->state.player->position.x > 5) {
-        viewMatrix = glm::translate(viewMatrix, glm::vec3(-currentScene->state.player->position.x, 3.75, 0));
+    if (currentScene != sceneList[3]) {
+        if (currentScene->state.player->position.x > 5 && currentScene->state.player->position.x < 35) {
+            viewMatrix = glm::translate(viewMatrix, glm::vec3(-currentScene->state.player->position.x, 3.75, 0));
+        } else if (currentScene->state.player->position.x < 5) {
+            viewMatrix = glm::translate(viewMatrix, glm::vec3(-5, 3.75, 0));
+        } else if (currentScene->state.player->position.x > 35) {
+            viewMatrix = glm::translate(viewMatrix, glm::vec3(-35, 3.75, 0));
+        }
     } else {
-        viewMatrix = glm::translate(viewMatrix, glm::vec3(-5, 3.75, 0));
+        if (currentScene->state.player->position.x > 5 && currentScene->state.player->position.x < 45) {
+            viewMatrix = glm::translate(viewMatrix, glm::vec3(-currentScene->state.player->position.x, 3.75, 0));
+        } else if (currentScene->state.player->position.x < 5) {
+            viewMatrix = glm::translate(viewMatrix, glm::vec3(-5, 3.75, 0));
+        } else if (currentScene->state.player->position.x > 45) {
+            viewMatrix = glm::translate(viewMatrix, glm::vec3(-45, 3.75, 0));
+        }
     }
 }
 
@@ -208,7 +230,7 @@ void Render() {
             for (int i = 0; i < 2; i++) {
                 Util::DrawIcon(&program, heartTextureID, glm::vec3(-2 - i, 3.2, 0));
             }
-            Util::DrawIcon(&program, deadHeartTextureID, glm::vec3(-2 - 3, 3.2, 0));
+            Util::DrawIcon(&program, deadHeartTextureID, glm::vec3(-2 - 2, 3.2, 0));
             
         }  else if (currentScene->state.player->energy == 1) {
             

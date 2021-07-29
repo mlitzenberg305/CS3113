@@ -69,7 +69,7 @@ void Map::Render(ShaderProgram *program) {
     glDisableVertexAttribArray(program->texCoordAttribute);
 }
 
-bool Map::IsSolid(glm::vec3 position, float *penetration_x, float *penetration_y) {
+int Map::IsSolid(glm::vec3 position, float *penetration_x, float *penetration_y) {
     *penetration_x = 0;
     *penetration_y = 0;
     
@@ -84,13 +84,34 @@ bool Map::IsSolid(glm::vec3 position, float *penetration_x, float *penetration_y
     
     int tile = levelData[tile_y * width + tile_x];
     
-    if (tile == 0) return false;
-    
-    float tile_center_x = (tile_x * tile_size);
-    float tile_center_y = -(tile_y * tile_size);
-    
-    *penetration_x = (tile_size / 2) - fabs(position.x - tile_center_x);
-    *penetration_y = (tile_size / 2) - fabs(position.y - tile_center_y);
-    
-    return true;
+    if (tile == 0 || tile == 110) {
+        return 0;
+    } else {
+        
+        float tile_center_x = (tile_x * tile_size);
+        float tile_center_y = -(tile_y * tile_size);
+        
+        *penetration_x = (tile_size / 2) - fabs(position.x - tile_center_x);
+        *penetration_y = (tile_size / 2) - fabs(position.y - tile_center_y);
+        
+        if (tile == 153 || tile == 154 || tile == 155) { // cloud tiles
+            return 2;
+            
+        } else if (tile == 146) { // helper platforms
+            return 3;
+            
+        } else if (tile == 68) { // spikes
+            return 4;
+            
+        } else if (tile == 33 || tile == 73) { // water
+            return 5;
+            
+        } else if (tile == 130) { // door
+            return 6;
+            
+        } else {
+            return 1;
+        }
+        
+    }
 }

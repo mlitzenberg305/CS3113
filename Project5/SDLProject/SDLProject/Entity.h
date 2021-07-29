@@ -38,6 +38,8 @@ public:
     
     float speed;
     int energy;
+    bool inWater;
+    bool nextLevel;
     
     bool jump;
     float jumpPower;

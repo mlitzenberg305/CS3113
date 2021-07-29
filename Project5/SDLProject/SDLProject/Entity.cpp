@@ -13,6 +13,8 @@ Entity::Entity()
     energy = 0;
     
     isActive = false;
+    inWater = false;
+    nextLevel = false;
     
     modelMatrix = glm::mat4(1.0f);
 }
@@ -23,45 +25,114 @@ void Entity::CheckCollisionsY(Map *map) {
     
     glm::vec3 top_left = glm::vec3(position.x - (width / 2), position.y + (height / 2), position.z);
     
-    glm::vec3 top_right = glm::vec3(position.x + (width / 2), position.y + (height / 2), position.z); // -1 scale patch
+    glm::vec3 top_right = glm::vec3(position.x + (width / 2), position.y + (height / 2), position.z);
     
     glm::vec3 bottom = glm::vec3(position.x, position.y - (height / 2), position.z);
     glm::vec3 bottom_left = glm::vec3(position.x - (width / 2), position.y - (height / 2), position.z);
-    glm::vec3 bottom_right = glm::vec3(position.x + (width / 2), position.y - (height / 2), position.z); // -1 scale patch
+    glm::vec3 bottom_right = glm::vec3(position.x + (width / 2), position.y - (height / 2), position.z);
     
     float penetration_x = 0;
     float penetration_y = 0;
     
-    if (map->IsSolid(top, &penetration_x, &penetration_y) && velocity.y > 0) {
-        position.y -= penetration_y;
-        velocity.y = 0;
-        collidedTop = true;
-    }
-    else if (map->IsSolid(top_left, &penetration_x, &penetration_y) && velocity.y > 0) {
-        position.y -= penetration_y;
-        velocity.y = 0;
-        collidedTop = true;
-    }
-    else if (map->IsSolid(top_right, &penetration_x, &penetration_y) && velocity.y > 0) {
-        position.y -= penetration_y;
-        velocity.y = 0;
-        collidedTop = true;
-    }
+    int top_isSolid = map->IsSolid(top, &penetration_x, &penetration_y);
+    int top_left_isSolid = map->IsSolid(top_left, &penetration_x, &penetration_y);
+    int top_right_isSolid = map->IsSolid(top_right, &penetration_x, &penetration_y);
     
-    if (map->IsSolid(bottom, &penetration_x, &penetration_y) && velocity.y < 0) {
-        position.y += penetration_y;
-        velocity.y = 0;
+    int bottom_isSolid = map->IsSolid(bottom, &penetration_x, &penetration_y);
+    int bottom_left_isSolid = map->IsSolid(bottom_left, &penetration_x, &penetration_y);
+    int bottom_right_isSolid = map->IsSolid(bottom_right, &penetration_x, &penetration_y);
+    
+    if (inWater) {
+        acceleration.y = -1.0;
+        jumpPower = 0.75;
+        speed = 0.5;
         collidedBottom = true;
-    }
-    else if (map->IsSolid(bottom_left, &penetration_x, &penetration_y) && velocity.y < 0) {
-        position.y += penetration_y;
-        velocity.y = 0;
-        collidedBottom = true;
-    }
-    else if (map->IsSolid(bottom_right, &penetration_x, &penetration_y) && velocity.y < 0) {
-        position.y += penetration_y;
-        velocity.y = 0;
-        collidedBottom = true;
+        
+        if (bottom_isSolid != 5 || bottom_left_isSolid != 5 || bottom_right_isSolid != 5) {
+            inWater = false;
+        }
+        if (top_isSolid != 5 || top_left_isSolid != 5 || top_right_isSolid != 5) {
+            if (top_isSolid > 0 && velocity.y > 0) {
+                position.y -= penetration_y;
+                velocity.y = 0;
+                collidedTop = true;
+            }
+            else if (top_left_isSolid > 0 && velocity.y > 0) {
+                position.y -= penetration_y;
+                velocity.y = 0;
+                collidedTop = true;
+            }
+            else if (top_right_isSolid > 0 && velocity.y > 0) {
+                position.y -= penetration_y;
+                velocity.y = 0;
+                collidedTop = true;
+            }
+        }
+    } else {
+        acceleration.y = -9.8;
+        jumpPower = 5.5;
+        speed = 2.0;
+    
+        if (top_isSolid > 0 && velocity.y > 0 && top_isSolid != 2 && top_isSolid != 3) {
+            position.y -= penetration_y;
+            velocity.y = 0;
+            collidedTop = true;
+            if (top_isSolid == 6) {
+                nextLevel = true;
+            }
+        }
+        else if (top_left_isSolid > 0 && velocity.y > 0 && top_left_isSolid != 2 && top_left_isSolid != 3) {
+            position.y -= penetration_y;
+            velocity.y = 0;
+            collidedTop = true;
+            if (top_left_isSolid == 6) {
+                nextLevel = true;
+            }
+        }
+        else if (top_right_isSolid > 0 && velocity.y > 0 && top_right_isSolid != 2 && top_right_isSolid != 3) {
+            position.y -= penetration_y;
+            velocity.y = 0;
+            collidedTop = true;
+            if (top_right_isSolid == 6) {
+                nextLevel = true;
+            }
+        }
+        
+        if (bottom_isSolid > 0 && velocity.y < 0) {
+            position.y += penetration_y;
+            velocity.y = 0;
+            collidedBottom = true;
+            if (bottom_isSolid == 4) {
+                velocity.y = 4;
+                energy --;
+            } else if (bottom_isSolid == 5) {
+                inWater = true;
+            } else if (bottom_isSolid == 6) {
+                nextLevel = true;
+            }
+        }
+        else if (bottom_left_isSolid > 0 && velocity.y < 0) {
+            if (bottom_left_isSolid == 5) {
+                inWater = true;
+            } else if (bottom_left_isSolid == 6) {
+                nextLevel = true;
+            } else if (bottom_left_isSolid != 4) {
+                position.y += penetration_y;
+                velocity.y = 0;
+                collidedBottom = true;
+            }
+        }
+        else if (bottom_right_isSolid > 0 && velocity.y < 0) {
+            if (bottom_right_isSolid == 5) {
+                inWater = true;
+            } else if (bottom_right_isSolid == 6) {
+                nextLevel = true;
+            } else if (bottom_right_isSolid != 4) {
+                position.y += penetration_y;
+                velocity.y = 0;
+                collidedBottom = true;
+            }
+        }
     }
 }
 
@@ -73,15 +144,26 @@ void Entity::CheckCollisionsX(Map *map) {
     float penetration_x = 0;
     float penetration_y = 0;
     
-    if (map->IsSolid(left, &penetration_x, &penetration_y) && velocity.x < 0) {
-        position.x += penetration_x;
-        velocity.x = 0;
-        collidedLeft = true;
+    int left_isSolid = map->IsSolid(left, &penetration_x, &penetration_y);
+    int right_isSolid = map->IsSolid(right, &penetration_x, &penetration_y);
+    
+    if (left_isSolid > 0 && velocity.x < 0) {
+        if (left_isSolid == 1) {
+            position.x += penetration_x;
+            velocity.x = 0;
+            collidedLeft = true;
+        } else if (left_isSolid == 6) {
+            nextLevel = true;
+        }
     }
-    if (map->IsSolid(right, &penetration_x, &penetration_y) && velocity.x > 0) {
-        position.x -= penetration_x;
-        velocity.x = 0;
-        collidedRight = true;
+    if (right_isSolid > 0 && velocity.x > 0) {
+        if (right_isSolid == 1) {
+            position.x -= penetration_x;
+            velocity.x = 0;
+            collidedRight = true;
+        } else if (right_isSolid == 6) {
+            nextLevel = true;
+        }
     }
 }
 
@@ -205,6 +287,8 @@ void Entity::Update(float deltaTime, Entity *player, Entity *objects, int objCou
         }
     }
     
+    modelMatrix = glm::mat4(1.0f);
+    
     if (jump) {
         jump = false;
         velocity.y += jumpPower;
@@ -221,7 +305,6 @@ void Entity::Update(float deltaTime, Entity *player, Entity *objects, int objCou
     CheckCollisionsX(map);
     //CheckCollisionsX(platforms, platformCount, enemies, enemyCount);
     
-    modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, position);
     if (movement.x == 1 || animIndices == animRight) {
         modelMatrix = glm::scale(modelMatrix, glm::vec3(-1.0f, 1.0f, 1.0f));
