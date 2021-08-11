@@ -20,6 +20,7 @@ class ShaderProgram {
 		void SetModelMatrix(const glm::mat4 &matrix);
         void SetProjectionMatrix(const glm::mat4 &matrix);
         void SetViewMatrix(const glm::mat4 &matrix);
+        void SetLightPosition(glm::vec3 position);
 	
 		void SetColor(float r, float g, float b, float a);
 	
@@ -32,6 +33,7 @@ class ShaderProgram {
         GLuint modelMatrixUniform;
         GLuint viewMatrixUniform;
 		GLuint colorUniform;
+        GLuint lightPositionUniform;
 	
         GLuint positionAttribute;
         GLuint texCoordAttribute;

@@ -12,6 +12,7 @@
 		280A287726A773B10052B28D /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 280A287526A773B10052B28D /* Map.cpp */; };
 		28D2C87826B24B6C00E3FFAB /* Win.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28D2C87626B24B6C00E3FFAB /* Win.cpp */; };
 		28D2C87B26B24B7600E3FFAB /* Lose.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28D2C87926B24B7600E3FFAB /* Lose.cpp */; };
+		28D2C88126BACBC700E3FFAB /* Effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28D2C87F26BACBC700E3FFAB /* Effects.cpp */; };
 		28ECE1A826ADE42A00D374BE /* Util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28ECE1A626ADE42A00D374BE /* Util.cpp */; };
 		28ECE1AB26ADEA4F00D374BE /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28ECE1A926ADEA4F00D374BE /* Scene.cpp */; };
 		28ECE1AE26AF98F300D374BE /* Level1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28ECE1AC26AF98F300D374BE /* Level1.cpp */; };
@@ -52,6 +53,8 @@
 		28D2C87726B24B6C00E3FFAB /* Win.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Win.h; sourceTree = "<group>"; };
 		28D2C87926B24B7600E3FFAB /* Lose.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Lose.cpp; sourceTree = "<group>"; };
 		28D2C87A26B24B7600E3FFAB /* Lose.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Lose.h; sourceTree = "<group>"; };
+		28D2C87F26BACBC700E3FFAB /* Effects.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Effects.cpp; sourceTree = "<group>"; };
+		28D2C88026BACBC700E3FFAB /* Effects.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Effects.h; sourceTree = "<group>"; };
 		28ECE1A626ADE42A00D374BE /* Util.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Util.cpp; sourceTree = "<group>"; };
 		28ECE1A726ADE42A00D374BE /* Util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
 		28ECE1A926ADEA4F00D374BE /* Scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Scene.cpp; sourceTree = "<group>"; };
@@ -141,6 +144,8 @@
 				28D2C87726B24B6C00E3FFAB /* Win.h */,
 				28D2C87926B24B7600E3FFAB /* Lose.cpp */,
 				28D2C87A26B24B7600E3FFAB /* Lose.h */,
+				28D2C87F26BACBC700E3FFAB /* Effects.cpp */,
+				28D2C88026BACBC700E3FFAB /* Effects.h */,
 			);
 			path = SDLProject;
 			sourceTree = "<group>";
@@ -220,6 +225,7 @@
 				280A287226911E2C0052B28D /* Entity.cpp in Sources */,
 				28ECE1B426AFC55600D374BE /* Level3.cpp in Sources */,
 				28ECE1B726AFC77E00D374BE /* Menu.cpp in Sources */,
+				28D2C88126BACBC700E3FFAB /* Effects.cpp in Sources */,
 				280A287726A773B10052B28D /* Map.cpp in Sources */,
 				DBDF1B5E2323DE8D007CECB1 /* ShaderProgram.cpp in Sources */,
 				28ECE1B126AFAAC600D374BE /* Level2.cpp in Sources */,

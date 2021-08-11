@@ -16,6 +16,7 @@
 
 #include "Entity.h"
 #include "Map.h"
+#include "Effects.h"
 #include "Util.h"
 
 #include "Scene.h"
@@ -39,6 +40,7 @@ int player_lives = 3;
 
 Scene *currentScene;
 Scene *sceneList[6];
+Effects *effects;
 
 void SwitchToScene(Scene *scene) {
     currentScene = scene;
@@ -87,6 +89,9 @@ void Initialize() {
     sceneList[5] = new Lose();
     
     SwitchToScene(sceneList[0]);
+    
+    effects = new Effects(projectionMatrix, viewMatrix);
+    effects->Start(FADEIN);
 
 }
 
@@ -188,6 +193,8 @@ void Update() {
         
         currentScene->Update(FIXED_TIMESTEP);
         
+        effects->Update(FIXED_TIMESTEP);
+        
         deltaTime -= FIXED_TIMESTEP;
     }
     
@@ -232,7 +239,9 @@ void Render() {
     
     program.SetProjectionMatrix(projectionMatrix);
     program.SetViewMatrix(viewMatrix);
+    program.SetLightPosition(currentScene->state.player->position);
     
+    glUseProgram(program.programID);
     currentScene->Render(&program);
     
     program.SetProjectionMatrix(uiProjectionMatrix);
@@ -264,6 +273,8 @@ void Render() {
             }
         }
     }
+    
+    effects->Render();
     
     SDL_GL_SwapWindow(displayWindow);
 }
