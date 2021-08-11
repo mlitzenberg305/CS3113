@@ -97,8 +97,11 @@ void Initialize() {
     sceneList[0] = new IntroLevel();
     SwitchToScene(sceneList[0]);
     
-    effects = new Effects(projectionMatrix, viewMatrix);
-    effects2 = new Effects(projectionMatrix, viewMatrix);
+    effects = new Effects(uiProjectionMatrix, uiViewMatrix);
+    effects2 = new Effects(uiProjectionMatrix, uiViewMatrix);
+    
+    effects->Start(FADEIN, 0.5f);
+
 }
 
 void ProcessInput() {
@@ -119,11 +122,12 @@ void ProcessInput() {
                         if (WORLD_BUILDING == 1){
                             currentScene->state.player->position.y += 1.0f;
                         }
-                        effects2->Start(SHAKE, 10.0f);
+                        currentScene->state.player->energy -= 1;
                         
                         if (currentScene->state.player->lastCollision != NULL) {
                             if (currentScene->state.player->lastCollision->entityType == TRASH) {
                                 
+                                effects2->Start(SHAKE, 20.0f);
                                 currentScene->state.player->lastCollision->isActive = false;
                                 
                                 if (currentScene->state.player->energy < 50.f) {
@@ -132,13 +136,28 @@ void ProcessInput() {
                                     
                                     if (currentScene->state.player->energy > 50.f) {
                                         
-                                        float temp = currentScene->state.player->energy - 50;
+                                        float temp = ceil(currentScene->state.player->energy) - 50;
                                         currentScene->state.player->energy -= temp;
+                                        
+                                        if (currentScene->state.player->health < 10.f) {
+                                            
+                                            currentScene->state.player->health += temp * 0.1;
+                                            
+                                            if (currentScene->state.player->health > 10.f) {
+                                                
+                                                temp = ceil(currentScene->state.player->health) - 10;
+                                                currentScene->state.player->health -= temp;
+                                            }
+                                        }
                                     }
                                 }
+                            } else if (currentScene->state.player->lastCollision->entityType == ENEMY
+                                       && currentScene->state.player->lastCollision->aiType == RAT) {
+                                
+                                effects2->Start(SHAKE, 5.0f);
+                                currentScene->state.player->lastCollision->isActive = false;
                             }
                         }
-                        //effects->Start(FADEIN, 1.0f);
                         break;
                     case SDLK_RETURN:
                     case SDLK_RIGHT:
@@ -237,6 +256,9 @@ void Update() {
         if (currentScene->state.player->lastCollision != NULL && currentScene->state.player->lastCollision->entityType == TRASH) {
             effects2->Start(GREEN, 0);
         }
+        if (currentScene->state.player->lastCollision != NULL && currentScene->state.player->lastCollision->entityType == ENEMY) {
+            effects2->Start(RED, 0);
+        }
 
         effects->Update(FIXED_TIMESTEP, currentScene->state.player);
         effects2->Update(FIXED_TIMESTEP, currentScene->state.player);
@@ -251,6 +273,7 @@ void Update() {
     viewMatrix = glm::rotate(viewMatrix, glm::radians(currentScene->state.player->rotation.x), glm::vec3(-1.0f, 0.0f, 0));
     viewMatrix = glm::translate(viewMatrix, -currentScene->state.player->position);
     viewMatrix = glm::translate(viewMatrix, effects->viewOffset);
+    viewMatrix = glm::translate(viewMatrix, effects2->viewOffset);
 }
 
 void Render() {
@@ -265,8 +288,13 @@ void Render() {
     
     program.SetProjectionMatrix(uiProjectionMatrix);
     program.SetViewMatrix(uiViewMatrix);
-    Util::DrawText(&program, fontTextureID, "HEALTH: " + std::to_string(int(ceil(currentScene->state.player->health))), 0.5, -0.3f, glm::vec3(-5, 3, 0));
-    Util::DrawText(&program, fontTextureID, "energy: " + std::to_string(int(ceil(currentScene->state.player->energy))), 0.5, -0.3f, glm::vec3(-5, 2, 0));
+    Util::DrawText(&program, fontTextureID, "HEALTH: " + std::to_string(int(ceil(currentScene->state.player->health))), 0.5, -0.2f, glm::vec3(-5, 3, 0));
+    Util::DrawText(&program, fontTextureID, "energy: " + std::to_string(int(ceil(currentScene->state.player->energy))), 0.5, -0.2f, glm::vec3(-5, 2, 0));
+    if (currentScene->state.player->lastCollision != NULL &&
+        currentScene->state.player->lastCollision->entityType == HIDE)
+    {
+        Util::DrawText(&program, fontTextureID, "HIDING", 0.5, -0.2f, glm::vec3(0, 1.5, 0));
+    }
     
     effects->Render();
     effects2->Render();

@@ -10,6 +10,8 @@ Effects::Effects(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
     
     alpha = 0;
     speed = 1;
+    size = 20;
+
     viewOffset = glm::vec3(0);
     up = true;
 }
@@ -41,13 +43,12 @@ void Effects::Start(EffectType effectType, float effectSpeed)
            size = 0;
            break;
        case SHRINK:
-           size = 10;
            break;
        case SHAKE:
            timeLeft = 1.0f;
            break;
        case GREEN:
-           break;
+       case RED:
        case DOG_MOVE:
            break;
    }
@@ -86,6 +87,10 @@ void Effects::Update(float deltaTime, Entity *player)
            }
            break;
        case GREEN:
+       case RED:
+           if (player->lastCollision == NULL) {
+               currentEffect = NONE;
+           }
            break;
        case DOG_MOVE:
            if (glm::length(player->velocity) == 0) {
@@ -140,7 +145,14 @@ void Effects::Render()
             modelMatrix = glm::scale(modelMatrix, glm::vec3(size, size * 0.75f, 1));
             
             program.SetModelMatrix(modelMatrix);
-            program.SetColor(0, 1.0, 0, 0.5);
+            program.SetColor(0, 0.5, 0.1, 0.1);
+            DrawOverlay();
+            break;
+        case RED:
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(size, size * 0.75f, 1));
+            
+            program.SetModelMatrix(modelMatrix);
+            program.SetColor(0.5, 0, 0.1, 0.1);
             DrawOverlay();
             break;
         case DOG_MOVE:

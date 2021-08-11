@@ -439,9 +439,9 @@ void IntroLevel::Initialize() {
     state.objects[75].position.y += 0.07;
     state.objects[75].entityType = TRASH;
     state.objects[75].scale = glm::vec3(0.25);
-    state.objects[75].depth = 1;
-    state.objects[75].width = 1;
-    state.objects[75].height = 1;
+    state.objects[75].depth = 0.75;
+    state.objects[75].width = 0.75;
+    state.objects[75].height = 0.75;
     state.objects[75].rotation = glm::vec3(0, 65, 90);
     state.objects[75].weight = 5.0f;
     state.objects[75].energy = 8.0f;
@@ -454,9 +454,9 @@ void IntroLevel::Initialize() {
     state.objects[76].position.x += 0.5;
     state.objects[76].entityType = TRASH;
     state.objects[76].scale = glm::vec3(0.25);
-    state.objects[76].depth = 1;
-    state.objects[76].width = 1;
-    state.objects[76].height = 1;
+    state.objects[76].depth = 0.75;
+    state.objects[76].width = 0.75;
+    state.objects[76].height = 0.75;
     state.objects[76].rotation = glm::vec3(0, 145, 0);
     state.objects[76].weight = 5.0f;
     state.objects[76].energy = 6.0f;
@@ -469,9 +469,9 @@ void IntroLevel::Initialize() {
     state.objects[77].position.x -= 0.5;
     state.objects[77].entityType = TRASH;
     state.objects[77].scale = glm::vec3(0.25);
-    state.objects[77].depth = 1;
-    state.objects[77].width = 1;
-    state.objects[77].height = 1;
+    state.objects[77].depth = 0.75;
+    state.objects[77].width = 0.75;
+    state.objects[77].height = 0.75;
     state.objects[77].rotation = glm::vec3(0, 45, 0);
     state.objects[77].weight = 5.0f;
     state.objects[77].energy = 5.0f;
@@ -484,9 +484,9 @@ void IntroLevel::Initialize() {
     state.objects[78].position.x += 0.3;
     state.objects[78].entityType = TRASH;
     state.objects[78].scale = glm::vec3(0.25);
-    state.objects[78].depth = 1;
-    state.objects[78].width = 1;
-    state.objects[78].height = 1;
+    state.objects[78].depth = 0.75;
+    state.objects[78].width = 0.75;
+    state.objects[78].height = 0.75;
     state.objects[78].rotation = glm::vec3(0, 120, 0);
     state.objects[78].weight = 5.0f;
     state.objects[78].energy = 10.0f;
@@ -499,9 +499,9 @@ void IntroLevel::Initialize() {
     state.objects[79].position.x -= 0.3;
     state.objects[79].entityType = TRASH;
     state.objects[79].scale = glm::vec3(0.25);
-    state.objects[79].depth = 1;
-    state.objects[79].width = 1;
-    state.objects[79].height = 1;
+    state.objects[79].depth = 0.75;
+    state.objects[79].width = 0.75;
+    state.objects[79].height = 0.75;
     state.objects[79].rotation = glm::vec3(0, 275, 0);
     state.objects[79].weight = 5.0f;
     state.objects[79].energy = 7.0f;
@@ -516,28 +516,41 @@ void IntroLevel::Initialize() {
     
     GLuint enemyTextureID = Util::LoadTexture("Assets/red.jpeg");
     
+    int enemyCount = 0;
+    
     for (int i = 0; i < ENEMY_COUNT; i++) {
 
         state.enemies[i].textureID = enemyTextureID;
         state.enemies[i].mesh = fishMesh;
+        state.enemies[i].entityType = ENEMY;
+        state.enemies[i].aiType = RAT;
+        state.enemies[i].aiState = IDLE;
         state.enemies[i].position = avgdumpster;
         state.enemies[i].position.x += i;
         state.enemies[i].position.y += 0.07;
-        state.enemies[i].position.z += 2;
-        state.enemies[i].rotation = glm::vec3(0, 180, 0);
+        state.enemies[i].position.z += 1;
         state.enemies[i].scale = glm::vec3(0.25);
+        state.enemies[i].depth = 0.75;
+        state.enemies[i].width = 0.75;
+        state.enemies[i].height = 0.75;
+        state.enemies[i].speed = 0.25;
+        
+        enemyCount = i;
     }
 }
 
 void IntroLevel::Update(float deltaTime) {
     
-    state.player->Update(deltaTime, state.player, state.objects, OBJECT_COUNT);
+    state.player->Update(deltaTime, state.player, state.objects, OBJECT_COUNT, state.enemies, ENEMY_COUNT);
     
     for(int i = 0; i < OBJECT_COUNT; i++) {
-        state.objects[i].Update(deltaTime, state.player, state.objects, OBJECT_COUNT);
+        state.objects[i].Update(deltaTime, state.player, state.objects, OBJECT_COUNT, state.enemies, ENEMY_COUNT);
     }
     for(int i = 0; i < ENEMY_COUNT; i++) {
-        state.enemies[i].Update(deltaTime, state.player, state.objects, OBJECT_COUNT);
+        state.enemies[i].Update(deltaTime, state.player, state.objects, OBJECT_COUNT, state.enemies, ENEMY_COUNT);
+    }
+    if (!state.player->isActive) {
+        gameStatus = LOSE;
     }
 }
 

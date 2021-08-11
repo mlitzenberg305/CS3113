@@ -35,15 +35,12 @@ bool Entity::CheckCollision(Entity *other)
     float xdist = fabs(position.x - other->position.x) - ((width + other->width) / 2.0f);
     float ydist = fabs(position.y - other->position.y) - ((height + other->height) / 2.0f);
     float zdist = fabs(position.z - other->position.z) - ((depth + other->depth) / 2.0f);
-    
-    if (xdist > 0.1 && ydist > 0.1 && zdist > 0.1 && lastCollision->entityType == PLAYER && other->lastCollision->entityType == PLAYER) {
-        lastCollision = NULL;
-    }
 
     if (xdist < 0 && ydist < 0 && zdist < 0) {
         lastCollision = other;
         return true;
     }
+    lastCollision = NULL;
     return false;
 }
 
@@ -65,10 +62,114 @@ void Entity::DrawBillboard(ShaderProgram *program) {
     glDisableVertexAttribArray(program->texCoordAttribute);
 }
 
-void Entity::Update(float deltaTime, Entity *player, Entity *objects, int objectCount) {
+void Entity::AIWalker(Entity *player, Entity *dumpster) {
+    float directionX;
+    float directionZ;
+    
+    switch (aiState) {
+        case IDLE:
+            directionX = position.x - player->position.x;
+            directionZ = position.z - player->position.z;
+            rotation.y = glm::degrees(atan2f(directionX, directionZ));
+
+            if (fabs(glm::distance(player->position, position)) >= 1.5) {
+                aiState = WALKING;
+            }
+            else if (fabs(glm::distance(player->position, position)) <= 1) {
+                aiState = ATTACKING;
+            }
+            velocity = glm::vec3(0);
+            break;
+        case WALKING:
+            if (fabs(glm::distance(player->position, position)) < 1.5) {
+                aiState = IDLE;
+            } else {
+                directionX = position.x - dumpster->position.x;
+                directionZ = position.z - dumpster->position.z;
+                rotation.y = glm::degrees(atan2f(directionX, directionZ));
+                
+                velocity.z = cos(glm::radians(rotation.y)) * -speed;
+                velocity.x = sin(glm::radians(rotation.y)) * -speed;
+                
+//                if (fabs(directionX) < 0.5) {
+//                    velocity.x *= -1;
+//                } else if (fabs(directionX) >= 3) {
+//                    velocity.x *= -1;
+//                }
+//                if (fabs(directionZ) < 0.5) {
+//                    velocity.z *= -1;
+//                } else if (fabs(directionZ) >= 3) {
+//                    velocity.z *= -1;
+//                }
+            }
+            break;
+        case ATTACKING:
+            if (fabs(glm::distance(player->position, position)) > 1) {
+                aiState = IDLE;
+            }
+            
+            velocity.z = cos(glm::radians(rotation.y)) * -speed;
+            velocity.x = sin(glm::radians(rotation.y)) * -speed;
+            break;
+    }
+}
+
+void Entity::AIOfficer(Entity *player) {
+    switch (aiState) {
+        case IDLE:
+            break;
+        case WALKING:
+            velocity.x = -1.0;
+            break;
+        case ATTACKING:
+            break;
+    }
+}
+
+void Entity::AITruck(Entity *player) {
+    switch (aiState) {
+        case IDLE:
+            break;
+        case WALKING:
+            velocity.x = -1.0;
+            break;
+        case ATTACKING:
+            break;
+    }
+}
+
+void Entity::AI(Entity *player, Entity *dumpster) {
+    switch (aiType) {
+        case RAT:
+            AIWalker(player, dumpster);
+            break;
+        case AC_OFFICER:
+            AIOfficer(player);
+            break;
+        case AC_TRUCK:
+            AITruck(player);
+            break;
+    }
+}
+
+void Entity::Update(float deltaTime, Entity *player, Entity *objects, int objectCount, Entity *enemies, int enemyCount) {
     if (!isActive) return;
     
     glm::vec3 previousPosition = position;
+    
+    if (entityType == ENEMY) {
+        Entity *dumpster = NULL;
+
+        for (int i = 0; i < objectCount; i++) {
+            if (objects[i].entityType == DUMPSTER) {
+                if (glm::distance(objects[i].position, position) < 3) {
+                    dumpster = &objects[i];
+                }
+            }
+        }
+        
+        AI(player, dumpster);
+    }
     
     if (scale != glm::vec3(1)) {
         if (width == 1.0f && height == 1.0f && depth == 1.0f) {
@@ -110,51 +211,60 @@ void Entity::Update(float deltaTime, Entity *player, Entity *objects, int object
             health += energy * 0.005;
         }
         if (health <= 0) {
-            // faint
+            isActive = false;
         }
         for (int i = 0; i < objectCount; i++) {
             // Ignore collisions with the floor
-            if (objects[i].entityType == FLOOR || objects[i].entityType == HIDE || objects[i].entityType == PAVEMENT) continue;
+            if (objects[i].entityType == FLOOR || objects[i].entityType == PAVEMENT) continue;
+
             if (CheckCollision(&objects[i])) {
-                if (objects[i].weight >= weight) {
+//                if (objects[i].weight >= weight) {
+                if (objects[i].entityType != TRASH && objects[i].entityType != HIDE) {
                     position = previousPosition;
-                } else {
-                    position = previousPosition;
-                    velocity = velocity * (1 - (objects[i].weight / weight));
-                    
-                    velocity += acceleration * deltaTime;
-                    position += velocity * deltaTime;
-                    
-                    objects[i].velocity = velocity;
                 }
+//                } else {
+//                    position = previousPosition;
+//                    velocity = velocity * (1 - (objects[i].weight / weight));
+//
+//                    velocity += acceleration * deltaTime;
+//                    position += velocity * deltaTime;
+//
+//                    objects[i].velocity = velocity;
+//                }
                 break;
             }
         }
-    } else if (entityType != PLAYER) {
+        Entity *previousObjectCollision = lastCollision;
+        
+        for (int i = 0; i < enemyCount; i++) {
+            
+            if (CheckCollision(&enemies[i])) {
+                if (enemies[i].aiType == AC_TRUCK) {
+                    position = previousPosition;
+                }
+                if (enemies[i].aiType == RAT) {
+                    health -= 0.05;
+                }
+                break;
+            } else {
+                lastCollision = previousObjectCollision;
+            }
+        }
+        
+    } else if (entityType != PLAYER && entityType != ENEMY) {
         if (!CheckCollision(player)) {
             velocity = glm::vec3(0);
-//        } else {
-//            for (int i = 0; i < objectCount; i++) {
-//                // Ignore collisions with the floor
-//                if (objects[i].entityType == FLOOR) continue;
-//                if (&objects[i] == this) continue;
-//
-//                if (CheckCollision(&objects[i])) {
-//                    if (objects[i].weight + weight >= player->weight) {
-//                        position = previousPosition;
-//                        player->velocity = glm::vec3(0);
-//                    } else {
-//                        position = previousPosition;
-//                        velocity = velocity * ((objects[i].weight / weight) - (weight/2));
-//
-//                        velocity += acceleration * deltaTime;
-//                        position += velocity * deltaTime;
-//
-//                        objects[i].velocity = velocity;
-//                    }
-//                    break;
-//                }
-//            }
+        }
+    } else if (entityType == ENEMY) {
+        for (int i = 0; i < objectCount; i++) {
+            // Ignore collisions with the floor, hides, and trash
+            if (objects[i].entityType == FLOOR || objects[i].entityType == HIDE || objects[i].entityType == PAVEMENT || objects[i].entityType == TRASH) continue;
+
+            if (CheckCollision(&objects[i])) {
+                position = previousPosition;
+                lastCollision = &objects[i];
+                break;
+            }
         }
     }
 
@@ -167,6 +277,7 @@ void Entity::Update(float deltaTime, Entity *player, Entity *objects, int object
 
 void Entity::Render(ShaderProgram *program) {
     if (!isActive) return;
+    
     program->SetModelMatrix(modelMatrix);
     
     glBindTexture(GL_TEXTURE_2D, textureID);

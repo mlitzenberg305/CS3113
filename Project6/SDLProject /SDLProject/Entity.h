@@ -14,10 +14,16 @@
 #include "ShaderProgram.h"
 #include "Mesh.h"
 
+enum AIType { RAT, AC_OFFICER, AC_TRUCK };
+enum AIState { IDLE, WALKING, ATTACKING };
+
 enum EntityType { FLOOR, PAVEMENT, ENEMY, OBSTACLE, HIDE, PLAYER, TRASH, DUMPSTER };
 class Entity {
 public:
     EntityType entityType;
+    
+    AIType aiType;
+    AIState aiState;
     
     glm::vec3 position;
     glm::vec3 velocity;
@@ -47,6 +53,12 @@ public:
     
     bool CheckCollision(Entity *other);
     void DrawBillboard(ShaderProgram *program);
-    void Update(float deltaTime, Entity *player, Entity *objects, int objectCount);
+    void Update(float deltaTime, Entity *player, Entity *objects, int objectCount, Entity *enemies, int enemyCount);
     void Render(ShaderProgram *program);
+    
+    void AI(Entity *player, Entity *dumpster);
+    void AIWalker(Entity *player, Entity *dumpster);
+    void AIOfficer(Entity *player);
+    void AITruck(Entity *player);
+
 };
