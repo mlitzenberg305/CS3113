@@ -140,7 +140,7 @@ void Effects::Render()
             modelMatrix = glm::scale(modelMatrix, glm::vec3(size, size * 0.75f, 1));
             
             program.SetModelMatrix(modelMatrix);
-            program.SetColor(0, 1.0, 0, 0.3);
+            program.SetColor(0, 1.0, 0, 0.5);
             DrawOverlay();
             break;
         case DOG_MOVE:

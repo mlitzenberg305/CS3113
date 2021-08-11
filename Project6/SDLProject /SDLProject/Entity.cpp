@@ -22,18 +22,24 @@ Entity::Entity()
     billboard = false;
     isActive = true;
     
+    lastCollision = NULL;
+    
     speed = 0.0f;
 }
 
 bool Entity::CheckCollision(Entity *other)
 {
-    lastCollision = NULL; 
     if (!isActive || !other->isActive) return false;
     if (this == other) return false;
     
     float xdist = fabs(position.x - other->position.x) - ((width + other->width) / 2.0f);
     float ydist = fabs(position.y - other->position.y) - ((height + other->height) / 2.0f);
     float zdist = fabs(position.z - other->position.z) - ((depth + other->depth) / 2.0f);
+    
+    if (xdist > 0.1 && ydist > 0.1 && zdist > 0.1 && lastCollision->entityType == PLAYER && other->lastCollision->entityType == PLAYER) {
+        lastCollision = NULL;
+    }
+
     if (xdist < 0 && ydist < 0 && zdist < 0) {
         lastCollision = other;
         return true;

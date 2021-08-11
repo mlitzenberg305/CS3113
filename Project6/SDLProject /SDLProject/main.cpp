@@ -119,7 +119,7 @@ void ProcessInput() {
                         if (WORLD_BUILDING == 1){
                             currentScene->state.player->position.y += 1.0f;
                         }
-                        effects2->Start(SHAKE, 20.0f);
+                        effects2->Start(SHAKE, 10.0f);
                         
                         if (currentScene->state.player->lastCollision != NULL) {
                             if (currentScene->state.player->lastCollision->entityType == TRASH) {
@@ -236,8 +236,6 @@ void Update() {
         
         if (currentScene->state.player->lastCollision != NULL && currentScene->state.player->lastCollision->entityType == TRASH) {
             effects2->Start(GREEN, 0);
-        } else {
-            effects2->Start(NONE, 0);
         }
 
         effects->Update(FIXED_TIMESTEP, currentScene->state.player);
@@ -265,15 +263,13 @@ void Render() {
     
     currentScene->Render(&program);
     
-    effects->Render();
-    effects2->Render();
-    
-    glUseProgram(program.programID);
-
     program.SetProjectionMatrix(uiProjectionMatrix);
     program.SetViewMatrix(uiViewMatrix);
     Util::DrawText(&program, fontTextureID, "HEALTH: " + std::to_string(int(ceil(currentScene->state.player->health))), 0.5, -0.3f, glm::vec3(-5, 3, 0));
     Util::DrawText(&program, fontTextureID, "energy: " + std::to_string(int(ceil(currentScene->state.player->energy))), 0.5, -0.3f, glm::vec3(-5, 2, 0));
+    
+    effects->Render();
+    effects2->Render();
     
     SDL_GL_SwapWindow(displayWindow);
 }
