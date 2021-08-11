@@ -121,7 +121,7 @@ void Effects::Render()
             break;
         case FADEOUT:
         case FADEIN:
-            modelMatrix = glm::scale(modelMatrix, glm::vec3(10, 10, 1));
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(size, size * 0.75f, 1));
             
             program.SetModelMatrix(modelMatrix);
             program.SetColor(0, 0, 0, alpha);
@@ -138,6 +138,7 @@ void Effects::Render()
             break;
         case GREEN:
             modelMatrix = glm::scale(modelMatrix, glm::vec3(size, size * 0.75f, 1));
+            
             program.SetModelMatrix(modelMatrix);
             program.SetColor(0, 1.0, 0, 0.3);
             DrawOverlay();

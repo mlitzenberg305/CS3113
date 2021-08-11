@@ -33,6 +33,7 @@ glm::mat4 viewMatrix, projectionMatrix, uiViewMatrix, uiProjectionMatrix, modelM
 Scene *currentScene;
 Scene *sceneList[1];
 Effects *effects;
+Effects *effects2;
 
 GLuint fontTextureID;
 
@@ -97,6 +98,7 @@ void Initialize() {
     SwitchToScene(sceneList[0]);
     
     effects = new Effects(projectionMatrix, viewMatrix);
+    effects2 = new Effects(projectionMatrix, viewMatrix);
 }
 
 void ProcessInput() {
@@ -117,15 +119,19 @@ void ProcessInput() {
                         if (WORLD_BUILDING == 1){
                             currentScene->state.player->position.y += 1.0f;
                         }
+                        effects2->Start(SHAKE, 20.0f);
+                        
                         if (currentScene->state.player->lastCollision != NULL) {
                             if (currentScene->state.player->lastCollision->entityType == TRASH) {
                                 
                                 currentScene->state.player->lastCollision->isActive = false;
-                                // effects->Start(SHAKE, 20.0f);
                                 
                                 if (currentScene->state.player->energy < 50.f) {
+                                    
                                     currentScene->state.player->energy += currentScene->state.player->lastCollision->energy;
+                                    
                                     if (currentScene->state.player->energy > 50.f) {
+                                        
                                         float temp = currentScene->state.player->energy - 50;
                                         currentScene->state.player->energy -= temp;
                                     }
@@ -229,12 +235,13 @@ void Update() {
         currentScene->Update(FIXED_TIMESTEP);
         
         if (currentScene->state.player->lastCollision != NULL && currentScene->state.player->lastCollision->entityType == TRASH) {
-            effects->Start(GREEN, 0);
+            effects2->Start(GREEN, 0);
         } else {
-            effects->Start(NONE, 0);
+            effects2->Start(NONE, 0);
         }
 
         effects->Update(FIXED_TIMESTEP, currentScene->state.player);
+        effects2->Update(FIXED_TIMESTEP, currentScene->state.player);
         
         deltaTime -= FIXED_TIMESTEP;
     }
@@ -259,13 +266,14 @@ void Render() {
     currentScene->Render(&program);
     
     effects->Render();
+    effects2->Render();
     
     glUseProgram(program.programID);
 
     program.SetProjectionMatrix(uiProjectionMatrix);
     program.SetViewMatrix(uiViewMatrix);
-    Util::DrawText(&program, fontTextureID, "HEALTH: " + std::to_string(int(ceil(currentScene->state.player->health))), 0.5, -0.3f, glm::vec3(-5, 2, 0));
-    Util::DrawText(&program, fontTextureID, "Energy: " + std::to_string(int(ceil(currentScene->state.player->energy))), 0.5, -0.3f, glm::vec3(-5, 3, 0));
+    Util::DrawText(&program, fontTextureID, "HEALTH: " + std::to_string(int(ceil(currentScene->state.player->health))), 0.5, -0.3f, glm::vec3(-5, 3, 0));
+    Util::DrawText(&program, fontTextureID, "energy: " + std::to_string(int(ceil(currentScene->state.player->energy))), 0.5, -0.3f, glm::vec3(-5, 2, 0));
     
     SDL_GL_SwapWindow(displayWindow);
 }

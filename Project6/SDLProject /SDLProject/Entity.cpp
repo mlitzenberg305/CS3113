@@ -101,7 +101,7 @@ void Entity::Update(float deltaTime, Entity *player, Entity *objects, int object
     
     if (entityType == PLAYER) {
         if (energy <= 0) {
-            health -= energy;
+            health += energy * 0.005;
         }
         if (health <= 0) {
             // faint
