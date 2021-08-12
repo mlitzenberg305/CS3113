@@ -20,7 +20,14 @@
 #include "Util.h"
 
 #include "Scene.h"
+#include "Menu.h"
 #include "IntroLevel.h"
+#include "Win.h"
+#include "Lose.h"
+#include "Saved.h"
+#include "Captured.h"
+#include "EndScreen.h"
+#include "ToMain.h"
 
 #define WORLD_BUILDING 0
 
@@ -31,7 +38,7 @@ ShaderProgram program;
 glm::mat4 viewMatrix, projectionMatrix, uiViewMatrix, uiProjectionMatrix, modelMatrix;
 
 Scene *currentScene;
-Scene *sceneList[1];
+Scene *sceneList[8];
 Effects *effects;
 Effects *effects2;
 
@@ -41,8 +48,6 @@ Mix_Chunk *foodCrunch;
 Mix_Chunk *bite;
 Mix_Chunk *steps;
 Mix_Chunk *whimper;
-
-GLuint fontTextureID;
 
 void SwitchToScene(Scene *scene) {
     currentScene = scene;
@@ -56,24 +61,22 @@ void Initialize() {
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 
     music = Mix_LoadMUS("Assets/Sounds/kmart-lot.mp3");       // replace mp3
-
-    Mix_PlayMusic(music, -1);               // loops forever
-    Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
+    Mix_VolumeMusic(MIX_MAX_VOLUME);
 
     breathing = Mix_LoadWAV("Assets/Sounds/panting.wav");   // replace wav w sound effect
-    Mix_VolumeChunk(breathing, MIX_MAX_VOLUME / 12);
+    Mix_VolumeChunk(breathing, MIX_MAX_VOLUME / 8);
     
     foodCrunch = Mix_LoadWAV("Assets/Sounds/crunchy-bite.wav");   // replace wav w sound effect
     Mix_VolumeChunk(foodCrunch, MIX_MAX_VOLUME);
     
     bite = Mix_LoadWAV("Assets/Sounds/attacking-dog.wav");   // replace wav w sound effect
-    Mix_VolumeChunk(bite, MIX_MAX_VOLUME);
+    Mix_VolumeChunk(bite, MIX_MAX_VOLUME / 4);
     
     steps = Mix_LoadWAV("Assets/Sounds/steps.wav");   // replace wav w sound effect
-    Mix_VolumeChunk(steps, MIX_MAX_VOLUME / 2);
+    Mix_VolumeChunk(steps, MIX_MAX_VOLUME / 6);
     
     whimper = Mix_LoadWAV("Assets/Sounds/whimper.wav");   // replace wav w sound effect
-    Mix_VolumeChunk(steps, MIX_MAX_VOLUME / 2);
+    Mix_VolumeChunk(whimper, MIX_MAX_VOLUME);
     
     // VIDEO
     SDL_Init(SDL_INIT_VIDEO);
@@ -95,7 +98,6 @@ void Initialize() {
     
     uiViewMatrix = glm::mat4(1.0f);
     uiProjectionMatrix = glm::ortho(-6.4f, 6.4f, -3.6f, 3.6f, -1.0f, 1.0f);
-    fontTextureID = Util::LoadTexture("Assets/font1.png");
     
     program.SetProjectionMatrix(projectionMatrix);
     program.SetViewMatrix(viewMatrix);
@@ -111,14 +113,20 @@ void Initialize() {
 
     glClearColor(0.3f, 0.4f, 0.3f, 1.0f);
         
-    sceneList[0] = new IntroLevel();
+    sceneList[0] = new Menu();
+    sceneList[1] = new IntroLevel();
+    sceneList[2] = new Win();
+    sceneList[3] = new Lose();
+    sceneList[4] = new Saved();
+    sceneList[5] = new Captured();
+    sceneList[6] = new EndScreen();
+    sceneList[7] = new ToMain();
+    //     sceneList[8] = new MainLevel();
+    
     SwitchToScene(sceneList[0]);
     
     effects = new Effects(uiProjectionMatrix, uiViewMatrix);
     effects2 = new Effects(uiProjectionMatrix, uiViewMatrix);
-    
-    effects->Start(FADEIN, 0.5f);
-
 }
 
 void ProcessInput() {
@@ -144,6 +152,8 @@ void ProcessInput() {
                                 
                                 effects->Start(SHAKE_Y, 20.0f);
                                 Mix_PlayChannel(-1, foodCrunch, 0);
+                                
+                                currentScene->state.tutorial = DONE;
                                 currentScene->state.player->lastCollision->isActive = false;
                                 
                                 if (currentScene->state.player->energy < 50.f) {
@@ -172,14 +182,45 @@ void ProcessInput() {
                                 
                                 effects->Start(SHAKE, 5.0f);
                                 Mix_PlayChannel(-1, bite, 0);
+                                
+                                currentScene->state.tutorial = DONE;
                                 currentScene->state.player->energy -= 1;
                                 currentScene->state.player->lastCollision->isActive = false;
                             }
                         }
                         break;
                     case SDLK_RETURN:
-                    case SDLK_RIGHT:
-                    case SDLK_LEFT:
+                        if (sceneList[2] == currentScene) {
+                            effects->Start(FADEOUT, 1.0f);
+                            currentScene->state.nextScene = 0;
+                        
+                        } else if (sceneList[3] == currentScene) {
+                            effects->Start(FADEOUT, 1.0f);
+                            currentScene->state.nextScene = 4;
+                            // industrial sounds
+                        
+                        } else if (sceneList[4] == currentScene) {
+                            effects->Start(FADEOUT, 1.0f);
+                            currentScene->state.nextScene = 6;
+                            // doctor sounds
+                        
+                        } else if (sceneList[5] == currentScene) {
+                            effects->Start(FADEOUT, 1.0f);
+                            currentScene->state.nextScene = 6;
+                            // industrial sounds
+                        } else if (sceneList[6] == currentScene) {
+                            effects->Start(FADEOUT, 1.0f);
+                            currentScene->state.nextScene = 0;
+                            // home sounds
+                        } else if (sceneList[7] == currentScene) {
+                            effects->Start(FADEOUT, 1.0f);
+                            currentScene->state.nextScene = 0;
+                            // night time sounds
+                        } else if (sceneList[0] == currentScene) {
+                            effects->Start(FADEOUT, 1.0f);
+                            currentScene->state.nextScene = 1;
+                            Mix_PlayMusic(music, -1);
+                        }
                         break;
                 }
                 break;
@@ -188,6 +229,13 @@ void ProcessInput() {
                 switch (event.key.keysym.sym) {
                     case SDLK_SPACE:
                         break;
+                    case SDLK_q:
+                        gameIsRunning = false;
+                        break;
+                    case SDLK_UP:
+                    case SDLK_DOWN:
+                    case SDLK_RIGHT:
+                    case SDLK_LEFT:
                     case SDLK_w:
                     case SDLK_s:
                     case SDLK_a:
@@ -197,6 +245,7 @@ void ProcessInput() {
                     case SDLK_LSHIFT:
                     case SDLK_RSHIFT:
                         currentScene->state.player->speed = 1.0f;
+                        Mix_VolumeChunk(breathing, MIX_MAX_VOLUME / 8);
                         break;
                 }
                 break;
@@ -209,6 +258,10 @@ void ProcessInput() {
     
     if (keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A]) {
         
+        if (currentScene->state.tutorialActive) {
+            currentScene->state.tutorial = MOVE;
+        }
+        
         currentScene->state.player->energy -= 0.0025;
         
         currentScene->state.player->rotation.y += currentScene->state.player->speed / 2;
@@ -217,6 +270,10 @@ void ProcessInput() {
         
     } else if (keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]) {
         
+        if (currentScene->state.tutorialActive) {
+            currentScene->state.tutorial = MOVE;
+        }
+
         currentScene->state.player->energy -= 0.0025;
         
         currentScene->state.player->rotation.y -= currentScene->state.player->speed / 2;
@@ -235,10 +292,20 @@ void ProcessInput() {
     currentScene->state.player->velocity.z = 0;
     if (keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT]) {
         currentScene->state.player->speed = 2.0f;
+        Mix_VolumeChunk(breathing, MIX_MAX_VOLUME / 3);
+        
+        if (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_DOWN] ||
+            keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_RIGHT]) {
+            
+            currentScene->state.tutorial = EAT;
+        }
     }
     
     if (keys[SDL_SCANCODE_W] || (WORLD_BUILDING == 0 && keys[SDL_SCANCODE_UP])) {
         
+        if (currentScene->state.tutorialActive) {
+            currentScene->state.tutorial = HIDDEN;
+        }
         currentScene->state.player->energy -= 0.005 * currentScene->state.player->speed;
 
         currentScene->state.player->velocity.z = cos(glm::radians(currentScene->state.player->rotation.y)) * -currentScene->state.player->speed;
@@ -250,6 +317,11 @@ void ProcessInput() {
         
     } else if (keys[SDL_SCANCODE_S] || (WORLD_BUILDING == 0 && keys[SDL_SCANCODE_DOWN])) {
         
+        if (currentScene->state.tutorialActive) {
+            currentScene->state.tutorial = HIDDEN;
+        }
+
+
         currentScene->state.player->energy -= 0.005 * currentScene->state.player->speed;
         
         currentScene->state.player->velocity.z = cos(glm::radians(currentScene->state.player->rotation.y)) * currentScene->state.player->speed;
@@ -288,6 +360,38 @@ void Update() {
         }
         if (currentScene->state.player->lastCollision != NULL && currentScene->state.player->lastCollision->entityType == ENEMY) {
             effects2->Start(RED, 0);
+            if (currentScene->state.player->enemyDistance < 0.25) {
+                Mix_PlayChannel(-1, whimper, 0);
+            }
+        }
+        
+        // tutorial
+        if (currentScene->state.player->lastCollision == NULL || currentScene->state.player->lastCollision->entityType != HIDE) {
+            if (currentScene->state.tutorialActive) {
+                currentScene->state.tutorial = RUN;
+                currentScene->state.tutorialActive = false;
+            }
+        }
+        
+        // game state
+        if (currentScene->state.tutorial == DONE) {
+            currentScene->state.nextScene = 7;
+        }
+        if (currentScene->state.gameStatus == WIN) {
+            
+            effects->Start(FADEOUT, 0.5);
+            Mix_PauseMusic();
+            currentScene->state.nextScene = 2;
+        }
+        if (currentScene->state.gameStatus == LOSE) {
+            effects->Start(FADEOUT, 1.0);
+            Mix_PauseMusic();
+            currentScene->state.nextScene = 3;
+        }
+        if (currentScene->state.gameStatus == CAPTURE) {
+            effects->Start(FADEOUT, 0.5);
+            Mix_PauseMusic();
+            currentScene->state.nextScene = 5;
         }
 
         effects->Update(FIXED_TIMESTEP, currentScene->state.player);
@@ -318,16 +422,6 @@ void Render() {
     
     program.SetProjectionMatrix(uiProjectionMatrix);
     program.SetViewMatrix(uiViewMatrix);
-    Util::DrawText(&program, fontTextureID, "HEALTH: " + std::to_string(int(ceil(currentScene->state.player->health))), 0.5, -0.2f, glm::vec3(-5, 3, 0));
-    Util::DrawText(&program, fontTextureID, "energy: " + std::to_string(int(ceil(currentScene->state.player->energy))), 0.5, -0.2f, glm::vec3(-5, 2, 0));
-    if (currentScene->state.player->lastCollision != NULL &&
-        currentScene->state.player->lastCollision->entityType == HIDE)
-    {
-        Util::DrawText(&program, fontTextureID, "HIDING", 0.5, -0.2f, glm::vec3(0, 1.25, 0));
-    }
-    if (currentScene->state.player->enemyDistance < 2.25) {
-        Util::DrawText(&program, fontTextureID, "enemies are near", 0.5, -0.2f, glm::vec3(-1, 1.5, 0));
-    }
     
     effects->Render();
     effects2->Render();
@@ -353,7 +447,10 @@ int main(int argc, char* argv[]) {
     while (gameIsRunning) {
         ProcessInput();
         Update();
-        if (currentScene->state.nextScene >= 0) SwitchToScene(sceneList[currentScene->state.nextScene]);
+        if (currentScene->state.nextScene >= 0) {
+            SwitchToScene(sceneList[currentScene->state.nextScene]);
+            effects->Start(FADEIN, 1.0f);
+        }
         Render();
     }
     

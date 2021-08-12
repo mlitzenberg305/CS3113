@@ -22,7 +22,7 @@ GLuint Util::LoadTexture(const char* filePath) {
    return textureID;
 }
 
-void Util::DrawText(ShaderProgram *program, GLuint fontTexture, std::string text, float size, float spacing, glm::vec3 position) {
+void Util::DrawText(ShaderProgram *program, GLuint fontTexture, std::string text, float size, float spacing, glm::vec3 position, float rotation) {
    float width = 1.0f / 16.0f;
    float height = 1.0 / 16.0f;
    std::vector<float> vertices;
@@ -49,33 +49,48 @@ void Util::DrawText(ShaderProgram *program, GLuint fontTexture, std::string text
               offset + (-0.5f * size), -0.5f * size,
        });
    }
-      glm::mat4 modelMatrix = glm::mat4(1.0f);
-      modelMatrix = glm::translate(modelMatrix, position);
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation), glm::vec3(0, 1, 0));
+    
       program->SetModelMatrix(modelMatrix);
       glUseProgram(program->programID);
+    
       glVertexAttribPointer(program->positionAttribute, 2, GL_FLOAT, false, 0, vertices.data());
       glEnableVertexAttribArray(program->positionAttribute);
+    
       glVertexAttribPointer(program->texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords.data());
       glEnableVertexAttribArray(program->texCoordAttribute);
+    
       glBindTexture(GL_TEXTURE_2D, fontTexture);
       glDrawArrays(GL_TRIANGLES, 0, (int)(text.size() * 6));
+    
       glDisableVertexAttribArray(program->positionAttribute);
       glDisableVertexAttribArray(program->texCoordAttribute);
 }
 
-void Util::DrawIcon(ShaderProgram *program, GLuint iconTexture, glm::vec3 position)
-{
+void Util::DrawIcon(ShaderProgram *program, GLuint iconTexture, glm::vec3 position, glm::vec3 scale) {
+    
     glm::mat4 modelMatrix = glm::mat4(1.0f);
+    
     modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix = glm::scale(modelMatrix, scale);
+    
     program->SetModelMatrix(modelMatrix);
+    
     float vertices[] = { -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5 };
     float texCoords[] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
+    
     glVertexAttribPointer(program->positionAttribute, 2, GL_FLOAT, false, 0, vertices);
     glEnableVertexAttribArray(program->positionAttribute);
+    
     glVertexAttribPointer(program->texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
     glEnableVertexAttribArray(program->texCoordAttribute);
+    
     glBindTexture(GL_TEXTURE_2D, iconTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    
     glDisableVertexAttribArray(program->positionAttribute);
     glDisableVertexAttribArray(program->texCoordAttribute);
 }

@@ -2,13 +2,19 @@
 
 #define OBJECT_COUNT 81
 #define ENEMY_COUNT 2
-#define SIGN_COUNT 0
 
 void IntroLevel::Initialize() {
+    
+    uiViewMatrix = glm::mat4(1.0f);
+    uiProjectionMatrix = glm::ortho(-6.4f, 6.4f, -3.6f, 3.6f, -1.0f, 1.0f);
+    
+    state.tutorial = VIEW;
+    state.tutorialActive = true;
     
     state.nextScene = -1;
     
     state.fontTextureID = Util::LoadTexture("Assets/font1.png");
+    state.leavesTextureID = Util::LoadTexture("Assets/leaves.png");
     
     // INITIALIZE PLAYER
     state.player = new Entity();
@@ -518,29 +524,16 @@ void IntroLevel::Initialize() {
     
     // INITIALIZE ANIMAL CONTROL
     
-    // INITIALIZE SIGNS
-    state.signs = new Entity[SIGN_COUNT];
-    
-//    GLuint signTextureID = Util::LoadTexture("Assets/sign.png");
-//    GLuint leftTextureID = Util::LoadTexture("Assets/left.png");
-//    GLuint rightTextureID = Util::LoadTexture("Assets/right.png");
-//    
-//    state.signs[0].billboard = true;
-//    state.signs[0].textureID = leftTextureID;
-//    state.signs[0].position = state.player->position;
-//    state.signs[0].position.z -= 0.5;
-//    state.signs[0].position.x += 1.5;
-//    state.signs[0].scale = glm::vec3(0.5);
-//    
-//    state.signs[1].billboard = true;
-//    state.signs[1].textureID = rightTextureID;
-//    state.signs[1].position = state.player->position;
-//    state.signs[1].position.z -= 1.2;
-//    state.signs[1].position.x += 0.75;
-//    state.signs[1].scale = glm::vec3(0.5);
+    // game status
+    state.gameStatus = ACTIVE;
+
 }
 
 void IntroLevel::Update(float deltaTime) {
+    
+    if (!state.player->isActive) {
+        state.gameStatus = LOSE;
+    }
     
     state.player->Update(deltaTime, state.player, state.objects, OBJECT_COUNT, state.enemies, ENEMY_COUNT);
     
@@ -549,12 +542,6 @@ void IntroLevel::Update(float deltaTime) {
     }
     for(int i = 0; i < ENEMY_COUNT; i++) {
         state.enemies[i].Update(deltaTime, state.player, state.objects, OBJECT_COUNT, state.enemies, ENEMY_COUNT);
-    }
-    for(int i = 0; i < SIGN_COUNT; i++) {
-        state.signs[i].Update(deltaTime, state.player, state.objects, OBJECT_COUNT, state.enemies, ENEMY_COUNT);
-    }
-    if (!state.player->isActive) {
-        gameStatus = LOSE;
     }
 }
 
@@ -566,7 +553,47 @@ void IntroLevel::Render(ShaderProgram *program) {
     for(int i = 0; i < ENEMY_COUNT; i++) {
         state.enemies[i].Render(program);
     }
-    for(int i = 0; i < SIGN_COUNT; i++) {
-        state.signs[i].Render(program);
+    
+    program->SetProjectionMatrix(uiProjectionMatrix);
+    program->SetViewMatrix(uiViewMatrix);
+    
+    // ui screen
+    switch (state.tutorial) {
+        case DONE:
+            break;
+        case VIEW:
+            Util::DrawText(program, state.fontTextureID, "press a/LEFT or d/RIGHT", 0.25, -0.1, glm::vec3(-4, 0, 0), 0);
+            break;
+            
+        case MOVE:
+            Util::DrawText(program, state.fontTextureID, "press w/UP or s/DOWN", 0.25, -0.1, glm::vec3(-4, 0, 0), 0);
+            break;
+
+        case HIDDEN:
+            Util::DrawText(program, state.fontTextureID, "move out from the brush", 0.25, -0.1, glm::vec3(-4, 0, 0), 0);
+            break;
+        case RUN:
+            Util::DrawText(program, state.fontTextureID, "press shift", 0.25, -0.1, glm::vec3(-4, 0, 0), 0);
+            Util::DrawText(program, state.fontTextureID, "(be careful, people", 0.25, -0.1, glm::vec3(-4, -1, 0), 0);
+            Util::DrawText(program, state.fontTextureID, "can see you now)", 0.25, -0.1, glm::vec3(-4, -1.5, 0), 0);
+            break;
+        case EAT:
+            Util::DrawText(program, state.fontTextureID, "find the food", 0.25, -0.1, glm::vec3(-4, 0, 0), 0);
+            Util::DrawText(program, state.fontTextureID, "(beware the rats)", 0.25, -0.1, glm::vec3(-4, -0.5, 0), 0);
+            
+            if (state.player->lastCollision != NULL && (state.player->lastCollision->entityType == TRASH ||
+                                                        (state.player->lastCollision->entityType == ENEMY &&
+                                                         state.player->lastCollision->aiType == RAT))) {
+                Util::DrawText(program, state.fontTextureID, "press SPACE", 1, -0.4, glm::vec3(-3, 0.75, 0), 0);
+            }
     }
+    if (state.player->lastCollision != NULL && state.player->lastCollision->entityType == HIDE) {
+        
+        Util::DrawIcon(program, state.leavesTextureID, glm::vec3(7, 0, 0), glm::vec3(30, 20, 1));
+    }
+    if (state.player->enemyDistance < 2.25) {
+        Util::DrawText(program, state.fontTextureID, "enemies are near", 0.5, -0.2f, glm::vec3(-2, 1.25, 0), 0);
+    }
+    Util::DrawText(program, state.fontTextureID, "HEALTH: " + std::to_string(int(ceil(state.player->health))) + "/10", 0.5, -0.2f, glm::vec3(-5, 3, 0), 0);
+    Util::DrawText(program, state.fontTextureID, "energy: " + std::to_string(int(ceil(state.player->energy))) + "/50", 0.5, -0.2f, glm::vec3(-5, 2, 0), 0);
 }

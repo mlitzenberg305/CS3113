@@ -21,6 +21,7 @@ Entity::Entity()
     
     billboard = false;
     isActive = true;
+    enemyDistance = 100;
     
     lastCollision = NULL;
     
@@ -243,14 +244,18 @@ void Entity::Update(float deltaTime, Entity *player, Entity *objects, int object
         
         for (int i = 0; i < enemyCount; i++) {
             
-            if (enemies[i].aiType != AC_TRUCK && enemies[i].isActive) enemyDistance = glm::distance(position, enemies[i].position);
+            if (enemies[i].aiType != AC_TRUCK && enemies[i].isActive) {
+                enemyDistance = glm::distance(position, enemies[i].position);
+            } else if (enemies[i].aiType != AC_TRUCK && !enemies[i].isActive) {
+                enemyDistance = 10;
+            }
             
             if (CheckCollision(&enemies[i])) {
                 if (enemies[i].aiType == AC_TRUCK) {
                     position = previousPosition;
                 }
                 if (enemies[i].aiType == RAT) {
-                    if (glm::distance(position, enemies[i].position) < 0.25) health -= 0.05;
+                    if (glm::distance(position, enemies[i].position) < 0.25) health -= 0.075;
                 }
                 break;
             } else {

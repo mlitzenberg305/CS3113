@@ -14,22 +14,30 @@
 #include "Util.h"
 #include "Entity.h"
 
-enum GameStatus { WIN, LOSE };
+enum GameStatus { ACTIVE, WIN, LOSE, CAPTURE };
+enum Tutorial { VIEW, MOVE, HIDDEN, RUN, EAT, DONE };
 
 struct GameState {
     Entity *player;
     Entity *enemies;
-    Entity *signs;
     Entity *objects;
+    
     GLuint fontTextureID;
+    GLuint leavesTextureID;
+    
     int nextScene;
     GameStatus gameStatus;
+    bool tutorialActive;
+    Tutorial tutorial;
 };
 
 class Scene {
 public:
     GameState state;
     GameStatus gameStatus;
+    
+    glm::mat4 uiViewMatrix;
+    glm::mat4 uiProjectionMatrix;
 
     virtual void Initialize() = 0;
     virtual void Update(float deltaTime) = 0;
