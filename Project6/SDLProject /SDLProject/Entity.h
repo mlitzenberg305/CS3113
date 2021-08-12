@@ -43,6 +43,7 @@ public:
     float health;
     bool isActive;
     Entity *lastCollision;
+    float enemyDistance;
     
     GLuint textureID;
     Mesh *mesh;

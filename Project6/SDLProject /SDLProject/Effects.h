@@ -12,7 +12,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 #include "Entity.h"
-enum EffectType { NONE, FADEIN, FADEOUT, GROW, SHRINK, SHAKE, GREEN, RED, DOG_MOVE };
+enum EffectType { NONE, FADEIN, FADEOUT, GROW, SHRINK, SHAKE, SHAKE_Y, GREEN, RED, DOG_MOVE };
 
 class Effects {
     ShaderProgram program;

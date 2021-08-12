@@ -35,6 +35,13 @@ Scene *sceneList[1];
 Effects *effects;
 Effects *effects2;
 
+Mix_Music *music;
+Mix_Chunk *breathing;
+Mix_Chunk *foodCrunch;
+Mix_Chunk *bite;
+Mix_Chunk *steps;
+Mix_Chunk *whimper;
+
 GLuint fontTextureID;
 
 void SwitchToScene(Scene *scene) {
@@ -45,20 +52,30 @@ void SwitchToScene(Scene *scene) {
 void Initialize() {
     // AUDIO
     
-//    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-//    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
-//
-//    Mix_Music *music;
-//    music = Mix_LoadMUS("music.mp3");       // replace mp3
-//
-//    Mix_PlayMusic(music, -1);               // loops for ever
-//    Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
-//
-//    Mix_Chunk *breathing;
-//    breathing = Mix_LoadWAV("sound.wav");   // replace wav w sound effect
-//
-//    Mix_VolumeChunk(breathing, MIX_MAX_VOLUME / 4);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+
+    music = Mix_LoadMUS("Assets/Sounds/kmart-lot.mp3");       // replace mp3
+
+    Mix_PlayMusic(music, -1);               // loops forever
+    Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
+
+    breathing = Mix_LoadWAV("Assets/Sounds/panting.wav");   // replace wav w sound effect
+    Mix_VolumeChunk(breathing, MIX_MAX_VOLUME / 12);
     
+    foodCrunch = Mix_LoadWAV("Assets/Sounds/crunchy-bite.wav");   // replace wav w sound effect
+    Mix_VolumeChunk(foodCrunch, MIX_MAX_VOLUME);
+    
+    bite = Mix_LoadWAV("Assets/Sounds/attacking-dog.wav");   // replace wav w sound effect
+    Mix_VolumeChunk(bite, MIX_MAX_VOLUME);
+    
+    steps = Mix_LoadWAV("Assets/Sounds/steps.wav");   // replace wav w sound effect
+    Mix_VolumeChunk(steps, MIX_MAX_VOLUME / 2);
+    
+    whimper = Mix_LoadWAV("Assets/Sounds/whimper.wav");   // replace wav w sound effect
+    Mix_VolumeChunk(steps, MIX_MAX_VOLUME / 2);
+    
+    // VIDEO
     SDL_Init(SDL_INIT_VIDEO);
     displayWindow = SDL_CreateWindow("3D!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_OPENGL);
     SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
@@ -122,12 +139,11 @@ void ProcessInput() {
                         if (WORLD_BUILDING == 1){
                             currentScene->state.player->position.y += 1.0f;
                         }
-                        currentScene->state.player->energy -= 1;
-                        
                         if (currentScene->state.player->lastCollision != NULL) {
                             if (currentScene->state.player->lastCollision->entityType == TRASH) {
                                 
-                                effects2->Start(SHAKE, 20.0f);
+                                effects->Start(SHAKE_Y, 20.0f);
+                                Mix_PlayChannel(-1, foodCrunch, 0);
                                 currentScene->state.player->lastCollision->isActive = false;
                                 
                                 if (currentScene->state.player->energy < 50.f) {
@@ -154,7 +170,9 @@ void ProcessInput() {
                             } else if (currentScene->state.player->lastCollision->entityType == ENEMY
                                        && currentScene->state.player->lastCollision->aiType == RAT) {
                                 
-                                effects2->Start(SHAKE, 5.0f);
+                                effects->Start(SHAKE, 5.0f);
+                                Mix_PlayChannel(-1, bite, 0);
+                                currentScene->state.player->energy -= 1;
                                 currentScene->state.player->lastCollision->isActive = false;
                             }
                         }
@@ -170,9 +188,11 @@ void ProcessInput() {
                 switch (event.key.keysym.sym) {
                     case SDLK_SPACE:
                         break;
-                    case SDLK_RIGHT:
-                        break;
-                    case SDLK_LEFT:
+                    case SDLK_w:
+                    case SDLK_s:
+                    case SDLK_a:
+                    case SDLK_d:
+                        Mix_HaltChannel(-1);
                         break;
                     case SDLK_LSHIFT:
                     case SDLK_RSHIFT:
@@ -193,11 +213,15 @@ void ProcessInput() {
         
         currentScene->state.player->rotation.y += currentScene->state.player->speed / 2;
         
+        Mix_PlayChannel(-1, steps, 0);
+        
     } else if (keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]) {
         
         currentScene->state.player->energy -= 0.0025;
         
         currentScene->state.player->rotation.y -= currentScene->state.player->speed / 2;
+        
+        Mix_PlayChannel(-1, steps, 0);
     }
     if (WORLD_BUILDING == 1){
         if (keys[SDL_SCANCODE_UP]) {
@@ -212,6 +236,7 @@ void ProcessInput() {
     if (keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT]) {
         currentScene->state.player->speed = 2.0f;
     }
+    
     if (keys[SDL_SCANCODE_W] || (WORLD_BUILDING == 0 && keys[SDL_SCANCODE_UP])) {
         
         currentScene->state.player->energy -= 0.005 * currentScene->state.player->speed;
@@ -220,6 +245,9 @@ void ProcessInput() {
         currentScene->state.player->velocity.x = sin(glm::radians(currentScene->state.player->rotation.y)) * -currentScene->state.player->speed;
         
         effects->Start(DOG_MOVE, currentScene->state.player->speed);
+        Mix_PlayChannel(-1, breathing, 0);
+        Mix_PlayChannel(-1, steps, 0);
+        
     } else if (keys[SDL_SCANCODE_S] || (WORLD_BUILDING == 0 && keys[SDL_SCANCODE_DOWN])) {
         
         currentScene->state.player->energy -= 0.005 * currentScene->state.player->speed;
@@ -228,6 +256,8 @@ void ProcessInput() {
         currentScene->state.player->velocity.x = sin(glm::radians(currentScene->state.player->rotation.y)) * currentScene->state.player->speed;
         
         effects->Start(DOG_MOVE, currentScene->state.player->speed);
+        Mix_PlayChannel(-1, breathing, 0);
+        Mix_PlayChannel(-1, steps, 0);
     }
 }
 
@@ -293,7 +323,10 @@ void Render() {
     if (currentScene->state.player->lastCollision != NULL &&
         currentScene->state.player->lastCollision->entityType == HIDE)
     {
-        Util::DrawText(&program, fontTextureID, "HIDING", 0.5, -0.2f, glm::vec3(0, 1.5, 0));
+        Util::DrawText(&program, fontTextureID, "HIDING", 0.5, -0.2f, glm::vec3(0, 1.25, 0));
+    }
+    if (currentScene->state.player->enemyDistance < 2.25) {
+        Util::DrawText(&program, fontTextureID, "enemies are near", 0.5, -0.2f, glm::vec3(-1, 1.5, 0));
     }
     
     effects->Render();
@@ -304,8 +337,12 @@ void Render() {
 
 void Shutdown() {
     
-//    Mix_FreeChunk(breathing);
-//    Mix_FreeMusic(music);
+    Mix_FreeChunk(breathing);
+    Mix_FreeChunk(foodCrunch);
+    Mix_FreeChunk(bite);
+    Mix_FreeChunk(steps);
+    
+    Mix_FreeMusic(music);
     
     SDL_Quit();
 }

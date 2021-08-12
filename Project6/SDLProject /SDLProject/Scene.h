@@ -19,7 +19,9 @@ enum GameStatus { WIN, LOSE };
 struct GameState {
     Entity *player;
     Entity *enemies;
+    Entity *signs;
     Entity *objects;
+    GLuint fontTextureID;
     int nextScene;
     GameStatus gameStatus;
 };

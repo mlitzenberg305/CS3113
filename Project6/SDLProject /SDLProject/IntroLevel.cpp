@@ -1,11 +1,14 @@
 #include "IntroLevel.h"
 
-#define OBJECT_COUNT 80
+#define OBJECT_COUNT 81
 #define ENEMY_COUNT 2
+#define SIGN_COUNT 0
 
 void IntroLevel::Initialize() {
     
     state.nextScene = -1;
+    
+    state.fontTextureID = Util::LoadTexture("Assets/font1.png");
     
     // INITIALIZE PLAYER
     state.player = new Entity();
@@ -321,94 +324,71 @@ void IntroLevel::Initialize() {
     for (int i = 0; i < 9; i++) {
         state.objects[33 + i].textureID = concrete2TextureID;
         state.objects[33 + i].mesh = barrierMesh;
-        state.objects[33 + i].position = glm::vec3(-2.5 - i, -0.44f, -9.75);
+        state.objects[33 + i].position = glm::vec3(-1.5 - i, -0.44f, -9.75);
         state.objects[33 + i].entityType = OBSTACLE;
-        state.objects[33 + i].weight = 10000.0f;
         state.objects[33 + i].depth = 0.5;
     }
     for (int i = 0; i < 8; i++) {
-        state.objects[41 + i].textureID = concrete2TextureID;
-        state.objects[41 + i].mesh = barrierMesh;
-        state.objects[41 + i].position = glm::vec3(2.5 + i, -0.44f, -9.75);
-        state.objects[41 + i].entityType = OBSTACLE;
-        state.objects[41 + i].weight = 10000.0f;
-        state.objects[41 + i].depth = 0.5;
+        state.objects[42 + i].textureID = concrete2TextureID;
+        state.objects[42 + i].mesh = barrierMesh;
+        state.objects[42 + i].position = glm::vec3(1.5 + i, -0.44f, -9.75);
+        state.objects[42 + i].entityType = OBSTACLE;
+        state.objects[42 + i].depth = 0.5;
     }
     for (int i = 0; i < 4; i++) {
-        state.objects[49 + i].textureID = concrete2TextureID;
-        state.objects[49 + i].mesh = barrierMesh;
-        state.objects[49 + i].position = glm::vec3(-9.75, -0.44f, -6.5 - i);
-        state.objects[49 + i].entityType = OBSTACLE;
-        state.objects[49 + i].weight = 10000.0f;
-        state.objects[49 + i].width = 0.5;
-        state.objects[49 + i].rotation.y = 90.0f;
+        state.objects[50 + i].textureID = concrete2TextureID;
+        state.objects[50 + i].mesh = barrierMesh;
+        state.objects[50 + i].position = glm::vec3(-9.75, -0.44f, -6.5 - i);
+        state.objects[50 + i].entityType = OBSTACLE;
+        state.objects[50 + i].width = 0.5;
+        state.objects[50 + i].rotation.y = 90.0f;
     }
     for (int i = 0; i < 3; i++) {
-        state.objects[53 + i].textureID = concrete2TextureID;
-        state.objects[53 + i].mesh = barrierMesh;
-        state.objects[53 + i].position = glm::vec3(9.75, -0.44f, -9.65 + i);
-        state.objects[53 + i].entityType = OBSTACLE;
-        state.objects[53 + i].weight = 10000.0f;
-        state.objects[53 + i].width = 0.5;
-        state.objects[53 + i].rotation.y = 90.0f;
+        state.objects[54 + i].textureID = concrete2TextureID;
+        state.objects[54 + i].mesh = barrierMesh;
+        state.objects[54 + i].position = glm::vec3(9.75, -0.44f, -9.65 + i);
+        state.objects[54 + i].entityType = OBSTACLE;
+        state.objects[54 + i].width = 0.5;
+        state.objects[54 + i].rotation.y = 90.0f;
     }
     for (int i = 0; i < 7; i++) {
-        state.objects[56 + i].textureID = concrete2TextureID;
-        state.objects[56 + i].mesh = barrierMesh;
-        state.objects[56 + i].position = glm::vec3(-9.5 + i, -0.44f, -6);
-        state.objects[56 + i].entityType = OBSTACLE;
-        state.objects[56 + i].weight = 10000.0f;
-        state.objects[56 + i].depth = 0.5;
+        state.objects[57 + i].textureID = concrete2TextureID;
+        state.objects[57 + i].mesh = barrierMesh;
+        state.objects[57 + i].position = glm::vec3(-9.5 + i, -0.44f, -6);
+        state.objects[57 + i].entityType = OBSTACLE;
+        state.objects[57 + i].depth = 0.5;
     }
     for (int i = 0; i < 7; i++) {
-        state.objects[63 + i].textureID = concrete2TextureID;
-        state.objects[63 + i].mesh = barrierMesh;
-        state.objects[63 + i].position = glm::vec3(3.5 + i, -0.44f, -6);
-        state.objects[63 + i].entityType = OBSTACLE;
-        state.objects[63 + i].weight = 10000.0f;
-        state.objects[63 + i].depth = 0.5;
+        state.objects[64 + i].textureID = concrete2TextureID;
+        state.objects[64 + i].mesh = barrierMesh;
+        state.objects[64 + i].position = glm::vec3(3.5 + i, -0.44f, -6);
+        state.objects[64 + i].entityType = OBSTACLE;
+        state.objects[64 + i].depth = 0.5;
     }
     for (int i = 0; i < 3; i++) {
-        state.objects[70 + i].textureID = concrete2TextureID;
-        state.objects[70 + i].mesh = barrierMesh;
-        state.objects[70 + i].position = glm::vec3(-1 + i, -0.44f, -6);
-        state.objects[70 + i].entityType = OBSTACLE;
-        state.objects[70 + i].weight = 10000.0f;
-        state.objects[70 + i].depth = 0.5;
+        state.objects[71 + i].textureID = concrete2TextureID;
+        state.objects[71 + i].mesh = barrierMesh;
+        state.objects[71 + i].position = glm::vec3(-1 + i, -0.44f, -6);
+        state.objects[71 + i].entityType = OBSTACLE;
+        state.objects[71 + i].depth = 0.5;
     }
     // background
-    state.objects[73].textureID = backgroundTextureID;
-    state.objects[73].mesh = cubeMesh;
-    state.objects[73].position = glm::vec3(0, 6, 0);
-    state.objects[73].entityType = FLOOR;
-    state.objects[73].scale = glm::vec3(25, 15, 25);
-    
-    state.objects[74].textureID = asphaltTextureID;
+    state.objects[74].textureID = backgroundTextureID;
     state.objects[74].mesh = cubeMesh;
-    state.objects[74].position = glm::vec3(10, -0.49, -6.75);
+    state.objects[74].position = glm::vec3(0, 6, 0);
     state.objects[74].entityType = FLOOR;
-    state.objects[74].scale = glm::vec3(3.5, 0.1, 1);
-    state.objects[74].rotation = glm::vec3(0, 0, 45);
+    state.objects[74].scale = glm::vec3(25, 15, 25);
+    
+    state.objects[75].textureID = asphaltTextureID;
+    state.objects[75].mesh = cubeMesh;
+    state.objects[75].position = glm::vec3(10, -0.49, -6.75);
+    state.objects[75].entityType = FLOOR;
+    state.objects[75].scale = glm::vec3(3.5, 0.1, 1);
+    state.objects[75].rotation = glm::vec3(0, 0, 45);
 
     // INITIALIZE FOOD
     
     GLuint foodTextureID = Util::LoadTexture("Assets/green.jpeg");
-    
-//    int totalTrash = 5;
-//
-//    int numMeat = 1;
-//    int numHotDog = 1;
-//    totalTrash -= numMeat + numHotDog;
-//
-//    float max = totalTrash;
-//    float min = 0;
-//    float r = ((float)rand() / RAND_MAX) * (max - min) + min;
-//
-//    int numFishBones = r;
-//    totalTrash -= numFishBones;
-//    int numCheese = 0;
-//    totalTrash -= numCheese;
-//    int numBanana = totalTrash;
     
     // dumpster loction:
     glm::vec3 dumpster1 = state.objects[19].position;
@@ -432,82 +412,80 @@ void IntroLevel::Initialize() {
     Mesh *hotDogMesh = new Mesh();
     hotDogMesh->LoadOBJ("Assets/Food OBJ format/hotDog.obj", 1);
     
-    state.objects[75].textureID = foodTextureID;
-    state.objects[75].mesh = bananaMesh;
-    state.objects[75].position = avgdumpster;
-    state.objects[75].position.z += 1.2;
-    state.objects[75].position.y += 0.07;
-    state.objects[75].entityType = TRASH;
-    state.objects[75].scale = glm::vec3(0.25);
-    state.objects[75].depth = 0.75;
-    state.objects[75].width = 0.75;
-    state.objects[75].height = 0.75;
-    state.objects[75].rotation = glm::vec3(0, 65, 90);
-    state.objects[75].weight = 5.0f;
-    state.objects[75].energy = 8.0f;
-    
     state.objects[76].textureID = foodTextureID;
-    state.objects[76].mesh = cheeseMesh;
+    state.objects[76].mesh = bananaMesh;
     state.objects[76].position = avgdumpster;
-    state.objects[76].position.z += 0.8;
+    state.objects[76].position.z += 1.2;
     state.objects[76].position.y += 0.07;
-    state.objects[76].position.x += 0.5;
     state.objects[76].entityType = TRASH;
     state.objects[76].scale = glm::vec3(0.25);
     state.objects[76].depth = 0.75;
     state.objects[76].width = 0.75;
     state.objects[76].height = 0.75;
-    state.objects[76].rotation = glm::vec3(0, 145, 0);
+    state.objects[76].rotation = glm::vec3(0, 65, 90);
     state.objects[76].weight = 5.0f;
-    state.objects[76].energy = 6.0f;
+    state.objects[76].energy = 8.0f;
     
     state.objects[77].textureID = foodTextureID;
-    state.objects[77].mesh = fishBonesMesh;
+    state.objects[77].mesh = cheeseMesh;
     state.objects[77].position = avgdumpster;
-    state.objects[77].position.z += 0.9;
+    state.objects[77].position.z += 0.8;
     state.objects[77].position.y += 0.07;
-    state.objects[77].position.x -= 0.5;
+    state.objects[77].position.x += 0.5;
     state.objects[77].entityType = TRASH;
     state.objects[77].scale = glm::vec3(0.25);
     state.objects[77].depth = 0.75;
     state.objects[77].width = 0.75;
     state.objects[77].height = 0.75;
-    state.objects[77].rotation = glm::vec3(0, 45, 0);
+    state.objects[77].rotation = glm::vec3(0, 145, 0);
     state.objects[77].weight = 5.0f;
-    state.objects[77].energy = 5.0f;
-    
+    state.objects[77].energy = 6.0f;
+
     state.objects[78].textureID = foodTextureID;
-    state.objects[78].mesh = meatMesh;
+    state.objects[78].mesh = fishBonesMesh;
     state.objects[78].position = avgdumpster;
-    state.objects[78].position.z += 0.6;
+    state.objects[78].position.z += 0.9;
     state.objects[78].position.y += 0.07;
-    state.objects[78].position.x += 0.3;
+    state.objects[78].position.x -= 0.5;
     state.objects[78].entityType = TRASH;
     state.objects[78].scale = glm::vec3(0.25);
     state.objects[78].depth = 0.75;
     state.objects[78].width = 0.75;
     state.objects[78].height = 0.75;
-    state.objects[78].rotation = glm::vec3(0, 120, 0);
+    state.objects[78].rotation = glm::vec3(0, 45, 0);
     state.objects[78].weight = 5.0f;
-    state.objects[78].energy = 10.0f;
+    state.objects[78].energy = 5.0f;
     
     state.objects[79].textureID = foodTextureID;
-    state.objects[79].mesh = hotDogMesh;
+    state.objects[79].mesh = meatMesh;
     state.objects[79].position = avgdumpster;
-    state.objects[79].position.z += 1.0;
+    state.objects[79].position.z += 0.6;
     state.objects[79].position.y += 0.07;
-    state.objects[79].position.x -= 0.3;
+    state.objects[79].position.x += 0.3;
     state.objects[79].entityType = TRASH;
     state.objects[79].scale = glm::vec3(0.25);
     state.objects[79].depth = 0.75;
     state.objects[79].width = 0.75;
     state.objects[79].height = 0.75;
-    state.objects[79].rotation = glm::vec3(0, 275, 0);
+    state.objects[79].rotation = glm::vec3(0, 120, 0);
     state.objects[79].weight = 5.0f;
-    state.objects[79].energy = 7.0f;
+    state.objects[79].energy = 10.0f;
     
-    // INITIALIZE ANIMAL CONTROL
-    
+    state.objects[80].textureID = foodTextureID;
+    state.objects[80].mesh = hotDogMesh;
+    state.objects[80].position = avgdumpster;
+    state.objects[80].position.z += 1.0;
+    state.objects[80].position.y += 0.07;
+    state.objects[80].position.x -= 0.3;
+    state.objects[80].entityType = TRASH;
+    state.objects[80].scale = glm::vec3(0.25);
+    state.objects[80].depth = 0.75;
+    state.objects[80].width = 0.75;
+    state.objects[80].height = 0.75;
+    state.objects[80].rotation = glm::vec3(0, 275, 0);
+    state.objects[80].weight = 5.0f;
+    state.objects[80].energy = 7.0f;
+        
     // INITIALIZE RATS
     state.enemies = new Entity[ENEMY_COUNT];
     
@@ -526,7 +504,7 @@ void IntroLevel::Initialize() {
         state.enemies[i].aiType = RAT;
         state.enemies[i].aiState = IDLE;
         state.enemies[i].position = avgdumpster;
-        state.enemies[i].position.x += i;
+        state.enemies[i].position.x += i - 0.5;
         state.enemies[i].position.y += 0.07;
         state.enemies[i].position.z += 1;
         state.enemies[i].scale = glm::vec3(0.25);
@@ -537,6 +515,29 @@ void IntroLevel::Initialize() {
         
         enemyCount = i;
     }
+    
+    // INITIALIZE ANIMAL CONTROL
+    
+    // INITIALIZE SIGNS
+    state.signs = new Entity[SIGN_COUNT];
+    
+//    GLuint signTextureID = Util::LoadTexture("Assets/sign.png");
+//    GLuint leftTextureID = Util::LoadTexture("Assets/left.png");
+//    GLuint rightTextureID = Util::LoadTexture("Assets/right.png");
+//    
+//    state.signs[0].billboard = true;
+//    state.signs[0].textureID = leftTextureID;
+//    state.signs[0].position = state.player->position;
+//    state.signs[0].position.z -= 0.5;
+//    state.signs[0].position.x += 1.5;
+//    state.signs[0].scale = glm::vec3(0.5);
+//    
+//    state.signs[1].billboard = true;
+//    state.signs[1].textureID = rightTextureID;
+//    state.signs[1].position = state.player->position;
+//    state.signs[1].position.z -= 1.2;
+//    state.signs[1].position.x += 0.75;
+//    state.signs[1].scale = glm::vec3(0.5);
 }
 
 void IntroLevel::Update(float deltaTime) {
@@ -548,6 +549,9 @@ void IntroLevel::Update(float deltaTime) {
     }
     for(int i = 0; i < ENEMY_COUNT; i++) {
         state.enemies[i].Update(deltaTime, state.player, state.objects, OBJECT_COUNT, state.enemies, ENEMY_COUNT);
+    }
+    for(int i = 0; i < SIGN_COUNT; i++) {
+        state.signs[i].Update(deltaTime, state.player, state.objects, OBJECT_COUNT, state.enemies, ENEMY_COUNT);
     }
     if (!state.player->isActive) {
         gameStatus = LOSE;
@@ -561,5 +565,8 @@ void IntroLevel::Render(ShaderProgram *program) {
     }
     for(int i = 0; i < ENEMY_COUNT; i++) {
         state.enemies[i].Render(program);
+    }
+    for(int i = 0; i < SIGN_COUNT; i++) {
+        state.signs[i].Render(program);
     }
 }

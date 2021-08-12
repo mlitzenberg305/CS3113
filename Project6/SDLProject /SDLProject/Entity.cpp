@@ -72,44 +72,49 @@ void Entity::AIWalker(Entity *player, Entity *dumpster) {
             directionZ = position.z - player->position.z;
             rotation.y = glm::degrees(atan2f(directionX, directionZ));
 
-            if (fabs(glm::distance(player->position, position)) >= 1.5) {
+            if (fabs(glm::distance(player->position, position)) >= 2) {
                 aiState = WALKING;
             }
-            else if (fabs(glm::distance(player->position, position)) <= 1) {
+            else if (fabs(glm::distance(player->position, position)) <= 1.5) {
                 aiState = ATTACKING;
             }
             velocity = glm::vec3(0);
             break;
         case WALKING:
-            if (fabs(glm::distance(player->position, position)) < 1.5) {
+            if (fabs(glm::distance(player->position, position)) < 2) {
                 aiState = IDLE;
             } else {
-                directionX = position.x - dumpster->position.x;
-                directionZ = position.z - dumpster->position.z;
-                rotation.y = glm::degrees(atan2f(directionX, directionZ));
                 
+                //srand (time(NULL));
+                int change = rand() % 100;
+                int direction;
+                if (change == 5) {
+                    direction = rand() % 3;
+                }
+                
+                if (lastCollision != NULL && lastCollision->entityType != TRASH) {
+                    rotation.y += 180;
+                } else if (glm::distance(position, dumpster->position) > 2) {
+                    rotation.y += 180;
+                    if (direction == 1) {
+                        rotation.y ++;
+                    } else if (direction == 0){
+                        rotation.y --;
+                    } else {
+                        rotation.y -= 90;
+                    }
+                }
                 velocity.z = cos(glm::radians(rotation.y)) * -speed;
                 velocity.x = sin(glm::radians(rotation.y)) * -speed;
-                
-//                if (fabs(directionX) < 0.5) {
-//                    velocity.x *= -1;
-//                } else if (fabs(directionX) >= 3) {
-//                    velocity.x *= -1;
-//                }
-//                if (fabs(directionZ) < 0.5) {
-//                    velocity.z *= -1;
-//                } else if (fabs(directionZ) >= 3) {
-//                    velocity.z *= -1;
-//                }
             }
             break;
         case ATTACKING:
-            if (fabs(glm::distance(player->position, position)) > 1) {
+            if (fabs(glm::distance(player->position, position)) > 1.5) {
                 aiState = IDLE;
             }
             
-            velocity.z = cos(glm::radians(rotation.y)) * -speed;
-            velocity.x = sin(glm::radians(rotation.y)) * -speed;
+            velocity.z = cos(glm::radians(rotation.y)) * -speed * 2;
+            velocity.x = sin(glm::radians(rotation.y)) * -speed * 2;
             break;
     }
 }
@@ -162,7 +167,7 @@ void Entity::Update(float deltaTime, Entity *player, Entity *objects, int object
 
         for (int i = 0; i < objectCount; i++) {
             if (objects[i].entityType == DUMPSTER) {
-                if (glm::distance(objects[i].position, position) < 3) {
+                if (glm::distance(objects[i].position, position) < 5) {
                     dumpster = &objects[i];
                 }
             }
@@ -199,8 +204,8 @@ void Entity::Update(float deltaTime, Entity *player, Entity *objects, int object
         float directionZ = position.z - player->position.z;
         rotation.y = glm::degrees(atan2f(directionX, directionZ));
         
-        velocity.z = cos(glm::radians(rotation.y)) * -0.5;
-        velocity.x = sin(glm::radians(rotation.y)) * -0.5;
+//        velocity.z = cos(glm::radians(rotation.y)) * -0.5;
+//        velocity.x = sin(glm::radians(rotation.y)) * -0.5;
     }
     
     velocity += acceleration * deltaTime;
@@ -238,16 +243,21 @@ void Entity::Update(float deltaTime, Entity *player, Entity *objects, int object
         
         for (int i = 0; i < enemyCount; i++) {
             
+            if (enemies[i].aiType != AC_TRUCK && enemies[i].isActive) enemyDistance = glm::distance(position, enemies[i].position);
+            
             if (CheckCollision(&enemies[i])) {
                 if (enemies[i].aiType == AC_TRUCK) {
                     position = previousPosition;
                 }
                 if (enemies[i].aiType == RAT) {
-                    health -= 0.05;
+                    if (glm::distance(position, enemies[i].position) < 0.25) health -= 0.05;
                 }
                 break;
             } else {
                 lastCollision = previousObjectCollision;
+            }
+            if (enemies[i].aiType == RAT && glm::distance(position, enemies[i].position) > 10) {
+                enemies[i].isActive = true;
             }
         }
         

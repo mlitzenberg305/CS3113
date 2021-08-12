@@ -45,6 +45,7 @@ void Effects::Start(EffectType effectType, float effectSpeed)
        case SHRINK:
            break;
        case SHAKE:
+       case SHAKE_Y:
            timeLeft = 1.0f;
            break;
        case GREEN:
@@ -75,6 +76,18 @@ void Effects::Update(float deltaTime, Entity *player)
            if (size <= 0) currentEffect = NONE;
            break;
        case SHAKE:
+           timeLeft -= deltaTime * speed;
+           if (timeLeft <= 0) {
+               viewOffset = glm::vec3(0);
+               currentEffect = NONE;
+           } else {
+               float max = 0.1f;
+               float min = -0.1f;
+               float r = ((float)rand() / RAND_MAX) * (max - min) + min;
+               viewOffset = glm::vec3(r, 0, r);
+           }
+           break;
+       case SHAKE_Y:
            timeLeft -= deltaTime * speed;
            if (timeLeft <= 0) {
                viewOffset = glm::vec3(0);
@@ -140,6 +153,7 @@ void Effects::Render()
             DrawOverlay();
             break;
         case SHAKE:
+        case SHAKE_Y:
             break;
         case GREEN:
             modelMatrix = glm::scale(modelMatrix, glm::vec3(size, size * 0.75f, 1));
