@@ -28,6 +28,7 @@
 #include "Captured.h"
 #include "EndScreen.h"
 #include "ToMain.h"
+#include "MainLevel.h"
 
 #define WORLD_BUILDING 0
 
@@ -38,7 +39,7 @@ ShaderProgram program;
 glm::mat4 viewMatrix, projectionMatrix, uiViewMatrix, uiProjectionMatrix, modelMatrix;
 
 Scene *currentScene;
-Scene *sceneList[8];
+Scene *sceneList[9];
 Effects *effects;
 Effects *effects2;
 
@@ -121,7 +122,7 @@ void Initialize() {
     sceneList[5] = new Captured();
     sceneList[6] = new EndScreen();
     sceneList[7] = new ToMain();
-    //     sceneList[8] = new MainLevel();
+    sceneList[8] = new MainLevel();
     
     SwitchToScene(sceneList[0]);
     
@@ -197,29 +198,29 @@ void ProcessInput() {
                         } else if (sceneList[3] == currentScene) {
                             effects->Start(FADEOUT, 1.0f);
                             currentScene->state.nextScene = 4;
-                            // industrial sounds
-                        
+
                         } else if (sceneList[4] == currentScene) {
                             effects->Start(FADEOUT, 1.0f);
                             currentScene->state.nextScene = 6;
-                            // doctor sounds
-                        
+                            // play home sounds
+
                         } else if (sceneList[5] == currentScene) {
                             effects->Start(FADEOUT, 1.0f);
                             currentScene->state.nextScene = 6;
-                            // industrial sounds
+
                         } else if (sceneList[6] == currentScene) {
                             effects->Start(FADEOUT, 1.0f);
                             currentScene->state.nextScene = 0;
-                            // home sounds
+
                         } else if (sceneList[7] == currentScene) {
                             effects->Start(FADEOUT, 1.0f);
-                            currentScene->state.nextScene = 0;
-                            // night time sounds
+                            currentScene->state.nextScene = 8;
+                            Mix_FadeInMusic(music, -1, 1000);
+                            
                         } else if (sceneList[0] == currentScene) {
                             effects->Start(FADEOUT, 1.0f);
                             currentScene->state.nextScene = 1;
-                            Mix_PlayMusic(music, -1);
+                            Mix_FadeInMusic(music, -1, 1000);
                         }
                         break;
                 }
@@ -350,9 +351,6 @@ void Update() {
     
     while (deltaTime >= FIXED_TIMESTEP) {
         
-        if (currentScene->state.player->position.x >= 9.5f) {
-            currentScene->state.player->position.x = -9;
-        }
         currentScene->Update(FIXED_TIMESTEP);
         
         if (currentScene->state.player->lastCollision != NULL && currentScene->state.player->lastCollision->entityType == TRASH) {
@@ -373,25 +371,29 @@ void Update() {
             }
         }
         
-        // game state
+        // game tutorial
         if (currentScene->state.tutorial == DONE) {
-            currentScene->state.nextScene = 7;
-        }
-        if (currentScene->state.gameStatus == WIN) {
-            
-            effects->Start(FADEOUT, 0.5);
             Mix_PauseMusic();
+            currentScene->state.nextScene = 7;
+            // play night time sounds
+        }
+        // game state
+        if (currentScene->state.gameStatus == WIN) {
+            effects->Start(FADEOUT, 0.5);
+            Mix_FadeOutMusic(1000);
             currentScene->state.nextScene = 2;
         }
         if (currentScene->state.gameStatus == LOSE) {
             effects->Start(FADEOUT, 1.0);
             Mix_PauseMusic();
             currentScene->state.nextScene = 3;
+            // play doctor sounds
         }
         if (currentScene->state.gameStatus == CAPTURE) {
             effects->Start(FADEOUT, 0.5);
             Mix_PauseMusic();
             currentScene->state.nextScene = 5;
+            // play truck sounds
         }
 
         effects->Update(FIXED_TIMESTEP, currentScene->state.player);

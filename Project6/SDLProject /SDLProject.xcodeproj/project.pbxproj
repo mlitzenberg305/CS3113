@@ -21,6 +21,7 @@
 		28F0572626C56DFC00D57C4D /* Captured.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28F0572426C56DFC00D57C4D /* Captured.cpp */; };
 		28F0572926C56E5C00D57C4D /* EndScreen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28F0572726C56E5C00D57C4D /* EndScreen.cpp */; };
 		28F0572C26C576B300D57C4D /* ToMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28F0572A26C576B300D57C4D /* ToMain.cpp */; };
+		28F0572F26C5832900D57C4D /* MainLevel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28F0572D26C5832900D57C4D /* MainLevel.cpp */; };
 		DBDF1B532323DE3F007CECB1 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DBDF1B522323DE3F007CECB1 /* main.cpp */; };
 		DBDF1B5E2323DE8D007CECB1 /* ShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DBDF1B5D2323DE8D007CECB1 /* ShaderProgram.cpp */; };
 		DBDF1B612323DE9E007CECB1 /* shaders in CopyFiles */ = {isa = PBXBuildFile; fileRef = DBDF1B5C2323DE8D007CECB1 /* shaders */; };
@@ -73,6 +74,8 @@
 		28F0572826C56E5C00D57C4D /* EndScreen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EndScreen.h; sourceTree = "<group>"; };
 		28F0572A26C576B300D57C4D /* ToMain.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ToMain.cpp; path = Assets/ToMain.cpp; sourceTree = "<group>"; };
 		28F0572B26C576B300D57C4D /* ToMain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ToMain.h; path = Assets/ToMain.h; sourceTree = "<group>"; };
+		28F0572D26C5832900D57C4D /* MainLevel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MainLevel.cpp; sourceTree = "<group>"; };
+		28F0572E26C5832900D57C4D /* MainLevel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainLevel.h; sourceTree = "<group>"; };
 		DBDF1B4F2323DE3F007CECB1 /* SDLProject */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SDLProject; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBDF1B522323DE3F007CECB1 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		DBDF1B592323DE8D007CECB1 /* ShaderProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderProgram.h; sourceTree = "<group>"; };
@@ -156,6 +159,8 @@
 				28F0572826C56E5C00D57C4D /* EndScreen.h */,
 				28F0572A26C576B300D57C4D /* ToMain.cpp */,
 				28F0572B26C576B300D57C4D /* ToMain.h */,
+				28F0572D26C5832900D57C4D /* MainLevel.cpp */,
+				28F0572E26C5832900D57C4D /* MainLevel.h */,
 			);
 			path = SDLProject;
 			sourceTree = "<group>";
@@ -239,6 +244,7 @@
 				280A287226911E2C0052B28D /* Entity.cpp in Sources */,
 				28D2C87E26B73E0A00E3FFAB /* Effects.cpp in Sources */,
 				28F0572C26C576B300D57C4D /* ToMain.cpp in Sources */,
+				28F0572F26C5832900D57C4D /* MainLevel.cpp in Sources */,
 				28F0572626C56DFC00D57C4D /* Captured.cpp in Sources */,
 				28F0572326C56D4500D57C4D /* Saved.cpp in Sources */,
 				DBDF1B5E2323DE8D007CECB1 /* ShaderProgram.cpp in Sources */,

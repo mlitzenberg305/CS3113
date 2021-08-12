@@ -45,6 +45,8 @@ void Menu::Render(ShaderProgram *program) {
     program->SetProjectionMatrix(uiProjectionMatrix);
     program->SetViewMatrix(uiViewMatrix);
     
+    Util::DrawText(program, state.fontTextureID, "XOCO'S STRAY DAYS", 1, -0.4f, glm::vec3(-4.5, 3, 0), 0);
+    
     Util::DrawText(program, state.fontTextureID, "PRESS ENTER", 0.5, -0.2f, glm::vec3(-1.5, 1, 0), 0);
     Util::DrawText(program, state.fontTextureID, "TO PLAY", 0.5, -0.2f, glm::vec3(-0.9, 0.5, 0), 0);
     

@@ -1,9 +1,11 @@
-#include "IntroLevel.h"
+#include "MainLevel.h"
+
+#define DAY_MINUTES 2
 
 #define OBJECT_COUNT 81
 #define ENEMY_COUNT 2
 
-void IntroLevel::Initialize() {
+void MainLevel::Initialize() {
     
     uiViewMatrix = glm::mat4(1.0f);
     uiProjectionMatrix = glm::ortho(-6.4f, 6.4f, -3.6f, 3.6f, -1.0f, 1.0f);
@@ -529,7 +531,7 @@ void IntroLevel::Initialize() {
 
 }
 
-void IntroLevel::Update(float deltaTime) {
+void MainLevel::Update(float deltaTime) {
     
     if (!state.player->isActive) {
         state.gameStatus = LOSE;
@@ -540,16 +542,6 @@ void IntroLevel::Update(float deltaTime) {
     if (state.player->position.x >= 9.5f) {
         state.player->position.x = -9;
     }
-    if (state.player->position.z >= -6 && state.player->position.x >= 0) {
-        state.player->rotation.y = 315;
-        state.player->position.x = -2.5;
-        state.player->position.z = -7;
-        
-    } else if (state.player->position.z >= -6 && state.player->position.x < 0) {
-        state.player->rotation.y = 45;
-        state.player->position.x = 3;
-        state.player->position.z = -7;
-    }
     
     for(int i = 0; i < OBJECT_COUNT; i++) {
         state.objects[i].Update(deltaTime, state.player, state.objects, OBJECT_COUNT, state.enemies, ENEMY_COUNT);
@@ -559,7 +551,7 @@ void IntroLevel::Update(float deltaTime) {
     }
 }
 
-void IntroLevel::Render(ShaderProgram *program) {
+void MainLevel::Render(ShaderProgram *program) {
     
     for(int i = 0; i < OBJECT_COUNT; i++) {
         state.objects[i].Render(program);

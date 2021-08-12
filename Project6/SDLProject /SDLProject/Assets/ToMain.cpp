@@ -24,8 +24,11 @@ void ToMain::Render(ShaderProgram *program) {
     program->SetProjectionMatrix(uiProjectionMatrix);
     program->SetViewMatrix(uiViewMatrix);
     
-    Util::DrawText(program, state.fontTextureID, "...tomorrow, the city", 0.5, -0.2f, glm::vec3(-3, 1, 0), 0);
-    Util::DrawText(program, state.fontTextureID, "awaits you, Xoco...", 0.5, -0.2f, glm::vec3(-3, 0, 0), 0);
+    Util::DrawText(program, state.fontTextureID, "...tomorrow, the city", 0.5, -0.2f, glm::vec3(-3.5, 1, 0), 0);
+    Util::DrawText(program, state.fontTextureID, "awaits you, Xoco...", 0.5, -0.2f, glm::vec3(-3.5, 0, 0), 0);
+    
+    Util::DrawText(program, state.fontTextureID, "make sure to eat trash", 0.25, -0.1, glm::vec3(-2.5, -1, 0), 0);
+    Util::DrawText(program, state.fontTextureID, "to keep your energy up!", 0.25, -0.1, glm::vec3(-2.5, -1.5, 0), 0);
 
-    Util::DrawText(program, state.fontTextureID, "PRESS ENTER", 0.25, 0, glm::vec3(-2, -1, 0), 0);
+    Util::DrawText(program, state.fontTextureID, "PRESS ENTER", 0.5, -0.2, glm::vec3(-2, -2.5, 0), 0);
 }
